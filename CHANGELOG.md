@@ -2,6 +2,13 @@
 
 All notable changes to CommitStudio will be documented in this file.
 
+## [0.2.5] - 2025-04-24
+
+### Improved
+- Enhanced repository selection with pagination (15 repos per page)
+- Simplified repository list by removing descriptions
+- Added page navigation when user has many repositories
+
 ## [0.2.4] - 2025-04-24
 
 ### Changed

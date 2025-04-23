@@ -143,35 +143,97 @@ async function promptForCorrectRepository(owner, originalRepoInfo) {
 
     // Get list of repositories for the user
     console.log(chalk.blue(`\nFetching repositories for ${chalk.bold(owner)}...`));
-    const { data: repos } = await octokit.repos.listForUser({
-      username: owner,
-      per_page: 100,
-      sort: "updated"
-    });
+    
+    // Start with first page of results
+    let allRepos = [];
+    let page = 1;
+    let hasMorePages = true;
+    const PER_PAGE = 100;
+    
+    while (hasMorePages) {
+      const { data: repos } = await octokit.repos.listForUser({
+        username: owner,
+        per_page: PER_PAGE,
+        page: page,
+        sort: "updated"
+      });
+      
+      allRepos = [...allRepos, ...repos];
+      
+      // Check if there are more pages
+      if (repos.length < PER_PAGE) {
+        hasMorePages = false;
+      } else {
+        page++;
+      }
+    }
 
-    if (repos.length === 0) {
+    if (allRepos.length === 0) {
       return await promptForManualRepository(owner, originalRepoInfo);
     }
 
-    console.log(chalk.green(`\n✓ Found ${repos.length} repositories\n`));
+    console.log(chalk.green(`\n✓ Found ${allRepos.length} repositories\n`));
 
-    // Ask user to select repository
-    const { selectedRepo } = await prompt({
-      type: 'select',
-      name: 'selectedRepo',
-      message: 'Select the correct repository:',
-      choices: [
-        ...repos.map(repo => ({ 
-          name: repo.name, 
-          value: repo.name,
-          message: chalk.blue(repo.name) + (repo.description ? chalk.dim(` - ${repo.description}`) : '')
-        })),
-        { name: 'Enter manually', value: 'manual' }
-      ]
-    });
-
-    if (selectedRepo === 'manual') {
-      return await promptForManualRepository(owner, originalRepoInfo);
+    // Paginate repositories for selection with 15 per page
+    const ITEMS_PER_PAGE = 15;
+    let currentPage = 0;
+    let selectedRepo = null;
+    
+    while (selectedRepo === null) {
+      const startIdx = currentPage * ITEMS_PER_PAGE;
+      const endIdx = Math.min(startIdx + ITEMS_PER_PAGE, allRepos.length);
+      const pageRepos = allRepos.slice(startIdx, endIdx);
+      
+      const hasNextPage = endIdx < allRepos.length;
+      const hasPrevPage = currentPage > 0;
+      
+      // Create choices array with pagination controls
+      const choices = [
+        ...pageRepos.map(repo => ({ 
+          name: repo.name,
+          value: repo.name
+        }))
+      ];
+      
+      // Add pagination controls
+      const paginationChoices = [];
+      if (hasPrevPage) {
+        paginationChoices.push({ name: '⬅️ Previous page', value: 'prev' });
+      }
+      if (hasNextPage) {
+        paginationChoices.push({ name: '➡️ Next page', value: 'next' });
+      }
+      
+      // Add manual entry option
+      paginationChoices.push({ name: '✏️ Enter manually', value: 'manual' });
+      
+      // Add pagination controls and manual entry
+      if (paginationChoices.length > 0) {
+        choices.push({ type: 'separator', line: '─'.repeat(20) });
+        choices.push(...paginationChoices);
+      }
+      
+      // Show page info
+      const pageInfo = `Page ${currentPage + 1}/${Math.ceil(allRepos.length / ITEMS_PER_PAGE)}`;
+      
+      // Ask user to select repository
+      const { selection } = await prompt({
+        type: 'select',
+        name: 'selection',
+        message: `Select the correct repository (${pageInfo}):`,
+        choices: choices
+      });
+      
+      // Handle navigation and selection
+      if (selection === 'prev') {
+        currentPage--;
+      } else if (selection === 'next') {
+        currentPage++;
+      } else if (selection === 'manual') {
+        return await promptForManualRepository(owner, originalRepoInfo);
+      } else {
+        selectedRepo = selection;
+      }
     }
 
     console.log(chalk.green(`\n✓ Selected repository: ${chalk.blue(selectedRepo)}\n`));
