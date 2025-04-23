@@ -75,10 +75,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/aligeramy/commitstudio.git"
+    "url": "git+https://github.com/itwasmyidea/commitstudio.git"
   },
   "bugs": {
-    "url": "https://github.com/aligeramy/commitstudio/issues"
+    "url": "https://github.com/itwasmyidea/commitstudio/issues"
   },
   "homepage": "https://commitstud.io",
   "publishConfig": {
