@@ -4,6 +4,11 @@ All notable changes to CommitStudio will be documented in this file.
 
 ## [0.3.2] - 2025-04-23
 
+### Changed
+
+- Transferred repository from aligeramy to itwasmyidea organization
+- Updated repository URLs and references throughout the codebase
+
 ### Fixed
 
 - Updated OpenAI package dependency from version 5.8.0 (which doesn't exist) to 4.28.0
