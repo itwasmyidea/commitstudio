@@ -10,7 +10,8 @@ CommitStudio provides code review comments on your commits with minimal human in
 ## Features
 
 - **Auto-detect Repository**: Works with local git repositories, automatically connects to GitHub
-- **Smart Analysis**: Uses OpenAI to analyze commit diffs with deep understanding of code
+- **Smart Analysis**: Uses OpenAI's latest GPT-4.1 model to analyze commit diffs with deep understanding of code
+- **Web Search Support**: Leverages internet access to provide more contextual and informed code reviews
 - **GitHub Integration**: Posts AI-generated comments directly to commits
 - **Caching**: Remembers processed commits to avoid duplicate comments
 - **Interactive CLI**: Easy-to-use command line interface with helpful prompts

@@ -2,6 +2,18 @@
 
 All notable changes to CommitStudio will be documented in this file.
 
+## [0.1.8] - 2025-04-23
+
+### Added
+- Support for OpenAI's new Responses API and GPT-4.1 model
+- Web search capability for more informed code reviews
+- Automatic fallback to Chat Completions API if needed
+
+### Improved
+- Enhanced code analysis with access to online programming resources
+- More detailed and contextual code review suggestions
+- Higher token limits for longer responses
+
 ## [0.1.7] - 2025-04-23
 
 ### Fixed
