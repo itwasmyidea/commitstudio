@@ -24,7 +24,7 @@ program
   .description(
     "AI-powered tool that analyzes git diffs and posts comments to GitHub",
   )
-  .version("0.3.1")
+  .version("0.3.2")
   .option(
     "-p, --path <path>",
     "Path to git repository (defaults to current directory)",
@@ -50,10 +50,12 @@ program.action(async (options) => {
     // Handle reset flag
     if (options.reset) {
       clearConfig();
-      console.log(chalk.green("✓ All settings and credentials have been cleared."));
+      console.log(
+        chalk.green("✓ All settings and credentials have been cleared."),
+      );
       return;
     }
-    
+
     // Load configuration from environment and config files
     const config = await loadConfig();
 
@@ -70,8 +72,10 @@ program.action(async (options) => {
 
 // Add 'yolo' command to modify commit messages
 program
-  .command('yolo')
-  .description('Analyze git diffs and modify commit messages with AI-generated ones (requires clean working tree)')
+  .command("yolo")
+  .description(
+    "Analyze git diffs and modify commit messages with AI-generated ones (requires clean working tree)",
+  )
   .option(
     "-p, --path <path>",
     "Path to git repository (defaults to current directory)",
@@ -95,13 +99,13 @@ program
     try {
       // Load configuration from environment and config files
       const config = await loadConfig();
-      
+
       // Set sensible defaults for YOLO mode
       const yoloOptions = {
         ...config,
         ...options,
         commits: options.commits || 5, // Default to last 5 commits
-        emoji: options.serious ? false : options.emoji
+        emoji: options.serious ? false : options.emoji,
       };
 
       // Run the YOLO workflow
