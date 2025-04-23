@@ -2,12 +2,7 @@
 
 All notable changes to CommitStudio will be documented in this file.
 
-## [0.1.6] - 2025-04-23
-
-### Added
-- New `--reset` flag to clear all saved settings and credentials
-- Detailed documentation on credential storage locations
-- Improved configuration management with persistent storage
+## [0.1.7] - 2025-04-23
 
 ### Fixed
 - Fixed credentials persistence issues between application runs
@@ -17,6 +12,15 @@ All notable changes to CommitStudio will be documented in this file.
 - Removed confusing warning messages about token usage
 - Added automatic truncation of large diffs to prevent OpenAI rate limit errors
 
+### Added
+- New `--reset` flag to clear all saved settings and credentials
+- Detailed documentation on credential storage locations
+- Improved configuration management with persistent storage
+
 ### Changed
 - Updated authentication workflow for a smoother user experience
-- Improved documentation with clearer installation and usage instructions 
+- Improved documentation with clearer installation and usage instructions
+
+## [0.1.6] - 2025-04-22
+
+Initial public release 
