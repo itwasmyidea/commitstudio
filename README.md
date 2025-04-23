@@ -12,6 +12,7 @@ CommitStudio provides code review comments on your commits with minimal human in
 - **Auto-detect Repository**: Works with local git repositories, automatically connects to GitHub
 - **Smart Analysis**: Uses OpenAI's GPT-4.1-mini model to analyze git diffs and generate insightful comments.
 - **GitHub Integration**: Seamlessly post comments to GitHub pull requests.
+- **YOLO Mode**: Rewrite your commit messages with AI to be more descriptive and professional.
 - **Caching**: Smart caching to avoid repeated analyses.
 - **Interactive CLI**: Easy-to-use command line interface with helpful prompts
 - **Secure Credentials Management**: Securely handles GitHub and OpenAI API keys
@@ -26,6 +27,9 @@ npm install -g commitstudio
 
 # Or use with npx
 npx commitstudio
+
+# Or use with pnpm
+pnpm add -g commitstudio
 ```
 
 ## Prerequisites
@@ -58,11 +62,13 @@ export GITHUB_CLIENT_ID=your_client_id
 
 ## Usage
 
+### Standard Mode - Code Review Comments
+
 ```bash
 commitstudio [options]
 ```
 
-### Options
+#### Options
 
 - `-p, --path <path>`: Path to the git repository (default: current directory)
 - `-c, --commits <number>`: Number of commits to analyze (default: all)
@@ -71,6 +77,25 @@ commitstudio [options]
 - `--author <email>`: Filter commits by author email
 - `--no-cache`: Ignore cache and reanalyze all commits
 - `--dry-run`: Run without posting comments to GitHub
+- `--verbose`: Show detailed logs
+- `--reset`: Clear all saved settings and credentials
+
+### YOLO Mode - Rewrite Commit Messages
+
+```bash
+commitstudio yolo [options]
+```
+
+#### YOLO Options
+
+- `-p, --path <path>`: Path to the git repository (default: current directory)
+- `-c, --commits <number>`: Number of commits to analyze (default: last 5)
+- `-b, --branch <branch>`: Branch to analyze (default: current branch)
+- `--since <date>`: Analyze commits since date
+- `--author <email>`: Filter commits by author email
+- `--emoji`: Add random emoji to commit messages (default: on)
+- `--serious`: Generate more professional commit messages (no emojis)
+- `--dry-run`: Preview changes without applying them
 - `--verbose`: Show detailed logs
 
 ## Managing Your Configuration

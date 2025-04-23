@@ -2,6 +2,17 @@
 
 All notable changes to CommitStudio will be documented in this file.
 
+## [0.3.0] - 2025-04-24
+
+### Added
+- YOLO mode for rewriting commit messages with AI (`npx commitstudio yolo`)
+- Options for controlling YOLO mode, including:
+  - `--emoji` - Add emojis to commit messages (default: on)
+  - `--serious` - Generate professional messages without emojis
+  - `--dry-run` - Preview changes without applying them
+- Interactive confirmation before applying commit message changes
+- Pagination for repository selection with large numbers of repos
+
 ## [0.2.5] - 2025-04-24
 
 ### Improved
