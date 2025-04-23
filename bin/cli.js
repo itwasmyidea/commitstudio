@@ -23,7 +23,7 @@ program
   .description(
     "AI-powered tool that analyzes git diffs and posts comments to GitHub",
   )
-  .version("0.1.8")
+  .version("0.1.9")
   .option(
     "-p, --path <path>",
     "Path to git repository (defaults to current directory)",

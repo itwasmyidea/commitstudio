@@ -263,7 +263,7 @@ If relevant, mention best practices and why they matter.`;
       try {
         // Call OpenAI Responses API with GPT-4.1
         const response = await openai.responses.create({
-          model: "gpt-4.1",
+          model: "gpt-4.1-mini",
           input: [
             {
               role: "system",
@@ -305,7 +305,14 @@ If relevant, mention best practices and why they matter.`;
           store: true
         });
         
-        const analysisText = response.output.text;
+        // Handle the response structure correctly
+        // The Responses API provides text in response.output.text
+        const analysisText = response.output?.text || '';
+        
+        if (!analysisText) {
+          console.warn(chalk.yellow("Received empty response from Responses API. Falling back to Chat Completions API."));
+          return await useCompletionsAPI(openai, commit, truncatedDiff, diffTruncated);
+        }
         
         // Add note about truncation if diff was truncated
         let result = parseAnalysisResponse(analysisText);
@@ -389,6 +396,15 @@ If relevant, mention best practices and why they matter.`;
  * @returns {Object} Structured analysis
  */
 function parseAnalysisResponse(text) {
+  // Ensure we have a string to work with
+  if (!text || typeof text !== 'string') {
+    return {
+      summary: "Error parsing AI response: No valid text provided",
+      comments: [],
+      suggestions: [],
+    };
+  }
+
   // Default structure
   const result = {
     summary: "",
@@ -396,92 +412,100 @@ function parseAnalysisResponse(text) {
     suggestions: [],
   };
 
-  // Extract summary (usually the first paragraph)
-  const summaryMatch = text.match(/^(.+?)(?=\n\n|\n###|\n##|$)/s);
-  if (summaryMatch) {
-    result.summary = summaryMatch[0].trim();
-  }
+  try {
+    // Extract summary (usually the first paragraph)
+    const summaryMatch = text.match(/^(.+?)(?=\n\n|\n###|\n##|$)/s);
+    if (summaryMatch) {
+      result.summary = summaryMatch[0].trim();
+    }
 
-  // Extract comments
-  const commentSections =
-    text.match(
-      /### (Comments|Detailed Comments|Analysis|Code Review).*?\n([\s\S]*?)(?=\n###|\n##|$)/g,
-    ) || [];
+    // Extract comments
+    const commentSections =
+      text.match(
+        /### (Comments|Detailed Comments|Analysis|Code Review).*?\n([\s\S]*?)(?=\n###|\n##|$)/g,
+      ) || [];
 
-  for (const section of commentSections) {
-    // Parse individual comments
-    const commentLines = section.split("\n").slice(1); // Skip the heading
+    for (const section of commentSections) {
+      // Parse individual comments
+      const commentLines = section.split("\n").slice(1); // Skip the heading
 
-    let currentFile = null;
-    let currentComment = null;
+      let currentFile = null;
+      let currentComment = null;
 
-    for (const line of commentLines) {
-      // Check for file markers (often begins with #### or ** or `)
-      const fileMatch = line.match(
-        /^(#{4}|[*]{2}|`)\s*([^`*#]+?\.(js|ts|jsx|tsx|css|html|json|md|py|java|c|cpp|go))/i,
-      );
+      for (const line of commentLines) {
+        // Check for file markers (often begins with #### or ** or `)
+        const fileMatch = line.match(
+          /^(#{4}|[*]{2}|`)\s*([^`*#]+?\.(js|ts|jsx|tsx|css|html|json|md|py|java|c|cpp|go))/i,
+        );
 
-      if (fileMatch) {
-        currentFile = fileMatch[2].trim();
-        continue;
-      }
-
-      // Check for line number references
-      const lineMatch = line.match(/^(Line[s]?\s+(\d+)[-–]?(\d+)?:?)/i);
-
-      if (lineMatch) {
-        // Start a new comment
-        currentComment = {
-          file: currentFile,
-          line: lineMatch[2],
-          content: line.replace(lineMatch[1], "").trim(),
-        };
-
-        if (currentComment.content) {
-          result.comments.push(currentComment);
+        if (fileMatch) {
+          currentFile = fileMatch[2].trim();
+          continue;
         }
 
-        continue;
-      }
+        // Check for line number references
+        const lineMatch = line.match(/^(Line[s]?\s+(\d+)[-–]?(\d+)?:?)/i);
 
-      // Add content to the current comment or start a new general comment
-      if (line.trim()) {
-        if (currentComment) {
-          currentComment.content += " " + line.trim();
-        } else {
+        if (lineMatch) {
+          // Start a new comment
           currentComment = {
             file: currentFile,
-            content: line.trim(),
+            line: lineMatch[2],
+            content: line.replace(lineMatch[1], "").trim(),
           };
-          result.comments.push(currentComment);
+
+          if (currentComment.content) {
+            result.comments.push(currentComment);
+          }
+
+          continue;
         }
-      } else {
-        // Empty line, reset current comment
-        currentComment = null;
+
+        // Add content to the current comment or start a new general comment
+        if (line.trim()) {
+          if (currentComment) {
+            currentComment.content += " " + line.trim();
+          } else {
+            currentComment = {
+              file: currentFile,
+              content: line.trim(),
+            };
+            result.comments.push(currentComment);
+          }
+        } else {
+          // Empty line, reset current comment
+          currentComment = null;
+        }
       }
     }
-  }
 
-  // Extract suggestions
-  const suggestionSection = text.match(
-    /### Suggestions.*?\n([\s\S]*?)(?=\n###|\n##|$)/,
-  );
+    // Extract suggestions
+    const suggestionSection = text.match(
+      /### Suggestions.*?\n([\s\S]*?)(?=\n###|\n##|$)/,
+    );
 
-  if (suggestionSection) {
-    const suggestionLines = suggestionSection[1]
-      .split("\n")
-      .filter((line) => line.trim());
+    if (suggestionSection) {
+      const suggestionLines = suggestionSection[1]
+        .split("\n")
+        .filter((line) => line.trim());
 
-    for (const line of suggestionLines) {
-      // Extract bullet points or numbered suggestions
-      const suggestionMatch =
-        line.match(/^[*-]\s+(.+)/) || line.match(/^\d+\.\s+(.+)/);
+      for (const line of suggestionLines) {
+        // Extract bullet points or numbered suggestions
+        const suggestionMatch =
+          line.match(/^[*-]\s+(.+)/) || line.match(/^\d+\.\s+(.+)/);
 
-      if (suggestionMatch) {
-        result.suggestions.push(suggestionMatch[1]);
-      } else if (line.trim()) {
-        result.suggestions.push(line.trim());
+        if (suggestionMatch) {
+          result.suggestions.push(suggestionMatch[1]);
+        } else if (line.trim()) {
+          result.suggestions.push(line.trim());
+        }
       }
+    }
+  } catch (error) {
+    console.error(`Error parsing AI response: ${error.message}`);
+    // Fallback for parsing errors
+    if (!result.summary) {
+      result.summary = "Failed to parse AI analysis: " + error.message;
     }
   }
 

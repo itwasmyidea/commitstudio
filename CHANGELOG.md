@@ -2,6 +2,13 @@
 
 All notable changes to CommitStudio will be documented in this file.
 
+## [0.1.9] - 2025-04-23
+
+### Fixed
+- Fixed Responses API integration with proper error handling
+- Added robust parsing of AI responses to prevent errors
+- Improved fallback mechanism to Chat Completions API
+
 ## [0.1.8] - 2025-04-23
 
 ### Added
