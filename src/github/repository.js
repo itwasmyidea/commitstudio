@@ -142,7 +142,7 @@ async function promptForCorrectRepository(owner, originalRepoInfo) {
     });
 
     // Get list of repositories for the user
-    console.log(chalk.blue(`Fetching repositories for ${owner}...`));
+    console.log(chalk.blue(`\nFetching repositories for ${chalk.bold(owner)}...`));
     const { data: repos } = await octokit.repos.listForUser({
       username: owner,
       per_page: 100,
@@ -153,13 +153,19 @@ async function promptForCorrectRepository(owner, originalRepoInfo) {
       return await promptForManualRepository(owner, originalRepoInfo);
     }
 
+    console.log(chalk.green(`\n✓ Found ${repos.length} repositories\n`));
+
     // Ask user to select repository
     const { selectedRepo } = await prompt({
       type: 'select',
       name: 'selectedRepo',
       message: 'Select the correct repository:',
       choices: [
-        ...repos.map(repo => ({ name: repo.name, value: repo.name })),
+        ...repos.map(repo => ({ 
+          name: repo.name, 
+          value: repo.name,
+          message: chalk.blue(repo.name) + (repo.description ? chalk.dim(` - ${repo.description}`) : '')
+        })),
         { name: 'Enter manually', value: 'manual' }
       ]
     });
@@ -167,6 +173,8 @@ async function promptForCorrectRepository(owner, originalRepoInfo) {
     if (selectedRepo === 'manual') {
       return await promptForManualRepository(owner, originalRepoInfo);
     }
+
+    console.log(chalk.green(`\n✓ Selected repository: ${chalk.blue(selectedRepo)}\n`));
 
     // Get repository details
     const { data } = await octokit.repos.get({
@@ -184,6 +192,7 @@ async function promptForCorrectRepository(owner, originalRepoInfo) {
       apiUrl: data.url,
     };
   } catch (error) {
+    console.error(chalk.red(`\n✗ Error fetching repositories: ${error.message}\n`));
     return await promptForManualRepository(owner, originalRepoInfo);
   }
 }
@@ -195,17 +204,19 @@ async function promptForCorrectRepository(owner, originalRepoInfo) {
  * @returns {Promise<Object>} Corrected repository information
  */
 async function promptForManualRepository(owner, originalRepoInfo) {
-  console.log(chalk.yellow("Please enter your repository information manually:"));
+  console.log(chalk.yellow("\nPlease enter your repository information manually:"));
 
   const { repoName } = await prompt({
     type: 'input',
     name: 'repoName',
-    message: 'Repository name:',
+    message: `Repository name for ${chalk.blue(owner)}:`,
     initial: originalRepoInfo.repo,
     validate: value => value ? true : 'Repository name is required'
   });
 
   try {
+    console.log(chalk.blue(`\nVerifying repository ${chalk.bold(owner + '/' + repoName)}...`));
+    
     const octokit = new Octokit({
       auth: process.env.GITHUB_TOKEN || global.githubToken,
     });
@@ -215,6 +226,8 @@ async function promptForManualRepository(owner, originalRepoInfo) {
       owner,
       repo: repoName
     });
+
+    console.log(chalk.green(`\n✓ Repository verified successfully\n`));
 
     return {
       ...originalRepoInfo,

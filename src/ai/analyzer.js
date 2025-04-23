@@ -256,8 +256,6 @@ If relevant, mention best practices and why they matter.`;
       diffTruncated = true;
     }
     
-    // Use the reliable Chat Completions API
-    console.log(chalk.blue("Using Chat Completions API for code analysis"));
     const response = await openai.chat.completions.create({
       model: "gpt-4.1-mini", // Using GPT-4.1-mini for code analysis
       messages: [

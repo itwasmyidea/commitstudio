@@ -1,6 +1,8 @@
 import chalk from "chalk";
 import ora from "ora";
-import { Listr } from "listr2";
+import boxen from "boxen";
+import gradient from "gradient-string";
+import Table from "cli-table3";
 
 import { validateCredentials } from "./config/validate.js";
 import { detectRepository, getRepositoryInfo } from "./github/repository.js";
@@ -9,12 +11,53 @@ import { analyzeDiffs } from "./ai/analyzer.js";
 import { postComments } from "./github/comments.js";
 import { getCacheManager } from "./utils/cache.js";
 
+// Create a stylish title banner
+const createBanner = () => {
+  const title = gradient.pastel.multiline([
+    "  _____ _____ _____ _____ _____ ______   _____ _______ _    _ _____ _____ _____ ",
+    " / ____/ ____|  __ \\_   _|_   _|  ____| / ____|__   __| |  | |  __ \\_   _/ ____|",
+    "| |   | |    | |__) || |   | | | |__   | (___    | |  | |  | | |  | || || |  __ ",
+    "| |   | |    |  ___/ | |   | | |  __|   \\___ \\   | |  | |  | | |  | || || | |_ |",
+    "| |___| |____| |    _| |_ _| |_| |____  ____) |  | |  | |__| | |__| || || |__| |",
+    " \\_____\\_____|_|   |_____|_____|______||_____/   |_|   \\____/|_____/_____\\_____|"
+  ].join('\n'));
+  
+  return title;
+};
+
+// Format a message in a styled box
+const boxMessage = (message, title = null, type = 'info') => {
+  const colors = {
+    info: { border: 'blue', text: chalk.blue },
+    success: { border: 'green', text: chalk.green },
+    warning: { border: 'yellow', text: chalk.yellow },
+    error: { border: 'red', text: chalk.red }
+  };
+  
+  const style = colors[type] || colors.info;
+  
+  const boxOptions = {
+    padding: 1,
+    margin: 1,
+    borderStyle: 'round',
+    borderColor: style.border,
+    title: title ? style.text(title) : undefined,
+    titleAlignment: 'center'
+  };
+  
+  return boxen(typeof message === 'string' ? style.text(message) : message, boxOptions);
+};
+
 /**
  * Main application workflow
  * @param {Object} options - CLI options and configuration
  * @returns {Promise<void>}
  */
 export async function run(options) {
+  // Display banner
+  console.log(createBanner());
+  console.log(boxMessage('An AI-powered tool for analyzing git diffs and posting comments to GitHub', 'Welcome to CommitStudio', 'info'));
+  
   let spinner = ora("Initializing CommitStudio...").start();
 
   try {
@@ -27,6 +70,7 @@ export async function run(options) {
     // Restart spinner after credentials are valid
     spinner = ora("Credentials validated").start();
     spinner.succeed();
+    console.log(''); // Add spacing
 
     // Set up cache manager
     const cacheManager = getCacheManager(options);
@@ -42,9 +86,11 @@ export async function run(options) {
       // Get more detailed repository information from GitHub
       spinner = ora("Fetching repository details...").start();
       const { owner, repo, defaultBranch } = await getRepositoryInfo(repoInfo);
-      spinner.succeed(
-        `Repository: ${chalk.blue(`${owner}/${repo}`)} (default branch: ${defaultBranch})`,
-      );
+      
+      // Display repository info in a styled box
+      spinner.succeed();
+      const repoMessage = `Repository: ${chalk.blue(`${owner}/${repo}`)}\nDefault branch: ${chalk.blue(defaultBranch)}`;
+      console.log(boxMessage(repoMessage, 'Repository Information', 'success'));
       
       // Determine which branch to analyze
       const branch = options.branch || defaultBranch;
@@ -60,9 +106,7 @@ export async function run(options) {
       });
     } catch (error) {
       spinner.fail(`Repository detection failed: ${error.message}`);
-      console.error(chalk.red(
-        "Could not detect or access a valid GitHub repository. Make sure you're in a git repository connected to GitHub, or specify a path with --path."
-      ));
+      console.error(boxMessage(`Could not detect or access a valid GitHub repository. Make sure you're in a git repository connected to GitHub, or specify a path with --path.`, 'Error', 'error'));
       process.exit(1);
     }
   } catch (error) {
@@ -111,19 +155,16 @@ async function processRepository({ options, owner, repo, branch, repoPath, cache
       (commit) => !cacheManager.isCommitProcessed(commit.sha),
     );
     
-    spinner.succeed(
-      `Found ${chalk.blue(allCommits.length)} commits to analyze (${
-        allCommits.length - commitsToProcess.length
-      } already processed)`,
-    );
+    spinner.succeed();
+    const commitsMessage = `Found ${chalk.blue(allCommits.length)} commits to analyze\n${allCommits.length - commitsToProcess.length} already processed`;
+    console.log(boxMessage(commitsMessage, 'Commits', 'info'));
   } else {
-    spinner.succeed(
-      `Found ${chalk.blue(allCommits.length)} commits to analyze (cache disabled)`,
-    );
+    spinner.succeed();
+    console.log(boxMessage(`Found ${chalk.blue(allCommits.length)} commits to analyze (cache disabled)`, 'Commits', 'info'));
   }
   
   if (commitsToProcess.length === 0) {
-    console.log(chalk.green("✓ All commits have already been analyzed"));
+    console.log(boxMessage('All commits have already been analyzed', 'Status', 'success'));
     return;
   }
   
@@ -144,32 +185,36 @@ async function processRepository({ options, owner, repo, branch, repoPath, cache
     onProgress,
   });
   
-  spinner.succeed(`${chalk.green("✓")} Analyzed ${currentCommit} commits`);
+  spinner.succeed();
+  console.log(boxMessage(`Analyzed ${currentCommit} commits`, 'Analysis Complete', 'success'));
   
   // Skip posting comments if in dry-run mode
   if (options.dryRun) {
-    console.log(
-      chalk.blue("Dry run mode:"),
-      "Skipping posting comments to GitHub",
-    );
+    console.log(boxMessage('Dry run mode: Skipping posting comments to GitHub', 'Dry Run', 'warning'));
     
-    // Display a summary of what would be posted
-    console.log(chalk.blue("\nAnalysis summary:"));
+    // Display a summary of what would be posted in a table
+    console.log(chalk.blue('\n📊 Analysis summary:'));
+    
+    const table = new Table({
+      head: [chalk.blue('Commit'), chalk.blue('Message'), chalk.blue('Summary')],
+      colWidths: [10, 30, 50]
+    });
     
     for (const result of analysisResults) {
-      console.log(
-        `\n${chalk.bold("Commit:")} ${result.commitSha.substring(0, 7)} - ${
-          result.commitMessage
-        }`,
-      );
-      console.log(`${chalk.bold("Summary:")} ${result.summary}`);
+      table.push([
+        result.commitSha.substring(0, 7),
+        result.commitMessage.substring(0, 27) + (result.commitMessage.length > 27 ? '...' : ''),
+        result.summary.substring(0, 47) + (result.summary.length > 47 ? '...' : '')
+      ]);
       
       if (result.suggestions.length > 0) {
-        console.log(chalk.bold("\nSuggestions:"));
-        result.suggestions.forEach((s) => console.log(`- ${s}`));
+        console.log(chalk.yellow(`\n✨ Suggestions for ${result.commitSha.substring(0, 7)}:`));
+        result.suggestions.forEach((s, i) => console.log(`  ${i+1}. ${s}`));
+        console.log(''); // Add spacing
       }
     }
     
+    console.log(table.toString());
     return;
   }
   
@@ -189,9 +234,8 @@ async function processRepository({ options, owner, repo, branch, repoPath, cache
   
   await postComments(analysisResults, postOptions);
   
-  spinner.succeed(
-    `${chalk.green("✓")} Posted ${postedCount} comments to GitHub`,
-  );
+  spinner.succeed();
+  console.log(boxMessage(`Posted ${postedCount} comments to GitHub`, 'Comments Posted', 'success'));
   
   // Mark commits as processed in cache
   if (options.cache !== false) {
@@ -201,5 +245,5 @@ async function processRepository({ options, owner, repo, branch, repoPath, cache
     cacheManager.save();
   }
   
-  console.log(chalk.green("\n✓ CommitStudio completed successfully!"));
+  console.log(boxMessage('CommitStudio completed successfully!', 'Complete', 'success'));
 }
