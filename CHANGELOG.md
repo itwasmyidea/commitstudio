@@ -2,6 +2,12 @@
 
 All notable changes to CommitStudio will be documented in this file.
 
+## [0.2.4] - 2025-04-24
+
+### Changed
+- Removed large ASCII art banner for a cleaner interface
+- Kept other UI improvements like boxed messages and tables
+
 ## [0.2.3] - 2025-04-24
 
 ### Added
