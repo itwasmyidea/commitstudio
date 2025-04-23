@@ -2,6 +2,11 @@
 
 All notable changes to CommitStudio will be documented in this file.
 
+## [0.2.2] - 2025-04-24
+
+### Added
+- Improved repository detection with interactive repository selection when auto-detection fails
+
 ## [0.2.1] - 2025-04-24
 
 ### Changed
