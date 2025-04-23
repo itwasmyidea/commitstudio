@@ -2,6 +2,13 @@
 
 All notable changes to CommitStudio will be documented in this file.
 
+## [0.2.3] - 2025-04-24
+
+### Added
+- Beautiful CLI interface with boxed messages and colorful banners
+- Stylish tables for better data presentation in dry-run mode
+- Improved spacing and formatting for better readability
+
 ## [0.2.2] - 2025-04-24
 
 ### Added
