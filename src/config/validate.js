@@ -15,60 +15,78 @@ import { GITHUB_CLIENT_ID } from "./constants.js";
 export async function validateCredentials(config) {
   let updatedConfig = { ...config };
 
-  console.log(chalk.blue('Checking credentials...'));
+  console.log(chalk.blue("Checking credentials..."));
 
   // Check if GitHub token is missing
   if (!updatedConfig.github?.token) {
-    console.log(chalk.yellow('GitHub token is missing'));
-    
+    console.log(chalk.yellow("GitHub token is missing"));
+
     // Check if we have a valid GitHub client ID for OAuth flow
-    const hasValidClientId = GITHUB_CLIENT_ID && 
-                           GITHUB_CLIENT_ID !== 'YOUR_CLIENT_ID_HERE' &&
-                           GITHUB_CLIENT_ID !== 'YOUR_DEFAULT_CLIENT_ID';
-    
+    const hasValidClientId =
+      GITHUB_CLIENT_ID &&
+      GITHUB_CLIENT_ID !== "YOUR_CLIENT_ID_HERE" &&
+      GITHUB_CLIENT_ID !== "YOUR_DEFAULT_CLIENT_ID";
+
     if (!hasValidClientId) {
-      console.log(chalk.yellow('No valid GitHub OAuth client ID found. Using manual token entry.'));
+      console.log(
+        chalk.yellow(
+          "No valid GitHub OAuth client ID found. Using manual token entry.",
+        ),
+      );
       updatedConfig = await promptForGitHubToken(updatedConfig);
     } else {
       // Ask if user wants to use device flow or manual token entry
       try {
         const { authMethod } = await prompt({
-          type: 'select',
-          name: 'authMethod',
-          message: 'How would you like to authenticate with GitHub?',
+          type: "select",
+          name: "authMethod",
+          message: "How would you like to authenticate with GitHub?",
           choices: [
-            { name: 'browser', message: 'Authenticate via browser (recommended)' },
-            { name: 'manual', message: 'Enter token manually' }
-          ]
+            {
+              name: "browser",
+              message: "Authenticate via browser (recommended)",
+            },
+            { name: "manual", message: "Enter token manually" },
+          ],
         });
-        
-        if (authMethod === 'browser') {
+
+        if (authMethod === "browser") {
           try {
             const token = await authenticateWithDeviceFlow({
               clientId: GITHUB_CLIENT_ID,
-              scopes: ['repo']
+              scopes: ["repo"],
             });
-            
+
             if (token) {
               updatedConfig.github = { ...updatedConfig.github, token };
               await saveConfig(updatedConfig);
               // Set token in global scope for other modules to use
               global.githubToken = token;
-              console.log(chalk.green('✓ GitHub token has been saved'));
+              console.log(chalk.green("✓ GitHub token has been saved"));
             } else {
-              console.log(chalk.red('Failed to obtain GitHub token via device flow'));
+              console.log(
+                chalk.red("Failed to obtain GitHub token via device flow"),
+              );
               updatedConfig = await promptForGitHubToken(updatedConfig);
             }
           } catch (error) {
-            console.log(chalk.red(`Error during device flow authentication: ${error?.message || 'Unknown error'}`));
+            console.log(
+              chalk.red(
+                `Error during device flow authentication: ${error?.message || "Unknown error"}`,
+              ),
+            );
             updatedConfig = await promptForGitHubToken(updatedConfig);
           }
         } else {
           updatedConfig = await promptForGitHubToken(updatedConfig);
         }
       } catch (error) {
-        console.log(chalk.red(`Error during authentication selection: ${error?.message || 'Unknown error'}`));
-        console.log(chalk.yellow('Defaulting to manual token entry.'));
+        console.log(
+          chalk.red(
+            `Error during authentication selection: ${error?.message || "Unknown error"}`,
+          ),
+        );
+        console.log(chalk.yellow("Defaulting to manual token entry."));
         updatedConfig = await promptForGitHubToken(updatedConfig);
       }
     }
@@ -78,58 +96,78 @@ export async function validateCredentials(config) {
       await validateGitHubToken(updatedConfig.github.token);
       // Set token in global scope for other modules to use
       global.githubToken = updatedConfig.github.token;
-      console.log(chalk.green('✓ GitHub token is valid'));
+      console.log(chalk.green("✓ GitHub token is valid"));
     } catch (error) {
-      console.log(chalk.red(`GitHub token validation failed: ${error.message}`));
-      
+      console.log(
+        chalk.red(`GitHub token validation failed: ${error.message}`),
+      );
+
       // Check if we have a valid GitHub client ID for OAuth flow
-      const hasValidClientId = GITHUB_CLIENT_ID && 
-                             GITHUB_CLIENT_ID !== 'YOUR_CLIENT_ID_HERE' &&
-                             GITHUB_CLIENT_ID !== 'YOUR_DEFAULT_CLIENT_ID';
-      
+      const hasValidClientId =
+        GITHUB_CLIENT_ID &&
+        GITHUB_CLIENT_ID !== "YOUR_CLIENT_ID_HERE" &&
+        GITHUB_CLIENT_ID !== "YOUR_DEFAULT_CLIENT_ID";
+
       if (!hasValidClientId) {
-        console.log(chalk.yellow('No valid GitHub OAuth client ID found. Using manual token entry.'));
+        console.log(
+          chalk.yellow(
+            "No valid GitHub OAuth client ID found. Using manual token entry.",
+          ),
+        );
         updatedConfig = await promptForGitHubToken(updatedConfig);
       } else {
         // Ask if user wants to use device flow or manual token entry
         try {
           const { authMethod } = await prompt({
-            type: 'select',
-            name: 'authMethod',
-            message: 'How would you like to authenticate with GitHub?',
+            type: "select",
+            name: "authMethod",
+            message: "How would you like to authenticate with GitHub?",
             choices: [
-              { name: 'browser', message: 'Authenticate via browser (recommended)' },
-              { name: 'manual', message: 'Enter token manually' }
-            ]
+              {
+                name: "browser",
+                message: "Authenticate via browser (recommended)",
+              },
+              { name: "manual", message: "Enter token manually" },
+            ],
           });
-          
-          if (authMethod === 'browser') {
+
+          if (authMethod === "browser") {
             try {
               const token = await authenticateWithDeviceFlow({
                 clientId: GITHUB_CLIENT_ID,
-                scopes: ['repo']
+                scopes: ["repo"],
               });
-              
+
               if (token) {
                 updatedConfig.github = { ...updatedConfig.github, token };
                 await saveConfig(updatedConfig);
                 // Set token in global scope for other modules to use
                 global.githubToken = token;
-                console.log(chalk.green('✓ GitHub token has been saved'));
+                console.log(chalk.green("✓ GitHub token has been saved"));
               } else {
-                console.log(chalk.red('Failed to obtain GitHub token via device flow'));
+                console.log(
+                  chalk.red("Failed to obtain GitHub token via device flow"),
+                );
                 updatedConfig = await promptForGitHubToken(updatedConfig);
               }
             } catch (error) {
-              console.log(chalk.red(`Error during device flow authentication: ${error?.message || 'Unknown error'}`));
+              console.log(
+                chalk.red(
+                  `Error during device flow authentication: ${error?.message || "Unknown error"}`,
+                ),
+              );
               updatedConfig = await promptForGitHubToken(updatedConfig);
             }
           } else {
             updatedConfig = await promptForGitHubToken(updatedConfig);
           }
         } catch (error) {
-          console.log(chalk.red(`Error during authentication selection: ${error?.message || 'Unknown error'}`));
-          console.log(chalk.yellow('Defaulting to manual token entry.'));
+          console.log(
+            chalk.red(
+              `Error during authentication selection: ${error?.message || "Unknown error"}`,
+            ),
+          );
+          console.log(chalk.yellow("Defaulting to manual token entry."));
           updatedConfig = await promptForGitHubToken(updatedConfig);
         }
       }
@@ -138,12 +176,12 @@ export async function validateCredentials(config) {
 
   // Check if OpenAI key is missing
   if (!updatedConfig.openai?.apiKey) {
-    console.log(chalk.yellow('OpenAI API key is missing'));
+    console.log(chalk.yellow("OpenAI API key is missing"));
     updatedConfig = await promptForOpenAIKey(updatedConfig);
   } else {
     // Set key in global scope for other modules to use
     global.openaiApiKey = updatedConfig.openai.apiKey;
-    console.log(chalk.green('✓ OpenAI API key is present'));
+    console.log(chalk.green("✓ OpenAI API key is present"));
   }
 
   return updatedConfig;
@@ -236,7 +274,9 @@ async function promptForGitHubToken(config) {
       if (!error?.message?.includes("GitHub authentication failed")) {
         // This is a prompt error, not an auth error
         console.log(
-          chalk.red(`Error during GitHub token prompt: ${error?.message || "Unknown error"}`),
+          chalk.red(
+            `Error during GitHub token prompt: ${error?.message || "Unknown error"}`,
+          ),
         );
         if (attempts >= maxAttempts) {
           throw error;
@@ -281,10 +321,14 @@ async function promptForOpenAIKey(config) {
     // Save key automatically
     saveConfig({ openai: { apiKey: openaiApiKey } });
     console.log(chalk.green("OpenAI API key saved for future use."));
-    
+
     return config;
   } catch (error) {
-    console.log(chalk.red(`Error during OpenAI key prompt: ${error?.message || "Unknown error"}`));
+    console.log(
+      chalk.red(
+        `Error during OpenAI key prompt: ${error?.message || "Unknown error"}`,
+      ),
+    );
     // Return the config without changes if there was an error
     return config;
   }

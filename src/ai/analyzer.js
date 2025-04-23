@@ -23,7 +23,7 @@ export async function analyzeDiffs({
 }) {
   // Use global openaiApiKey if it exists, or check environment variable
   const apiKey = global.openaiApiKey || process.env.OPENAI_API_KEY;
-  
+
   if (!apiKey) {
     console.log(
       chalk.yellow(
@@ -250,19 +250,19 @@ If relevant, mention best practices and why they matter.`;
     const MAX_DIFF_LENGTH = 20000;
     let truncatedDiff = diff;
     let diffTruncated = false;
-    
+
     if (diff.length > MAX_DIFF_LENGTH) {
       truncatedDiff = diff.substring(0, MAX_DIFF_LENGTH);
       diffTruncated = true;
     }
-    
+
     const response = await openai.chat.completions.create({
       model: "gpt-4.1-mini", // Using GPT-4.1-mini for code analysis
       messages: [
         { role: "system", content: systemPrompt },
         {
           role: "user",
-          content: `Commit: ${commit.message}\n\nDiff:${diffTruncated ? ' (truncated due to large size)\n' : '\n'}\`\`\`diff\n${truncatedDiff}\n\`\`\``,
+          content: `Commit: ${commit.message}\n\nDiff:${diffTruncated ? " (truncated due to large size)\n" : "\n"}\`\`\`diff\n${truncatedDiff}\n\`\`\``,
         },
       ],
       temperature: 0.3, // Lower temperature for more focused analysis
@@ -271,7 +271,7 @@ If relevant, mention best practices and why they matter.`;
 
     // Extract and parse the assistant's response
     const analysisText = response.choices[0].message.content;
-    
+
     // Add note about truncation if diff was truncated
     let result = parseAnalysisResponse(analysisText);
     if (diffTruncated) {
@@ -279,7 +279,6 @@ If relevant, mention best practices and why they matter.`;
     }
 
     return result;
-    
   } catch (error) {
     console.error(`Error analyzing commit ${commit.sha}: ${error.message}`);
 

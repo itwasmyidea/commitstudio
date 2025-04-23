@@ -121,7 +121,11 @@ export async function getRepositoryInfo(repoInfo) {
     };
   } catch (error) {
     if (error.status === 404) {
-      console.log(chalk.yellow(`Repository ${repoInfo.owner}/${repoInfo.repo} not found.`));
+      console.log(
+        chalk.yellow(
+          `Repository ${repoInfo.owner}/${repoInfo.repo} not found.`,
+        ),
+      );
       return await promptForCorrectRepository(repoInfo.owner, repoInfo);
     }
 
@@ -142,24 +146,26 @@ async function promptForCorrectRepository(owner, originalRepoInfo) {
     });
 
     // Get list of repositories for the user
-    console.log(chalk.blue(`\nFetching repositories for ${chalk.bold(owner)}...`));
-    
+    console.log(
+      chalk.blue(`\nFetching repositories for ${chalk.bold(owner)}...`),
+    );
+
     // Start with first page of results
     let allRepos = [];
     let page = 1;
     let hasMorePages = true;
     const PER_PAGE = 100;
-    
+
     while (hasMorePages) {
       const { data: repos } = await octokit.repos.listForUser({
         username: owner,
         per_page: PER_PAGE,
         page: page,
-        sort: "updated"
+        sort: "updated",
       });
-      
+
       allRepos = [...allRepos, ...repos];
-      
+
       // Check if there are more pages
       if (repos.length < PER_PAGE) {
         hasMorePages = false;
@@ -178,70 +184,72 @@ async function promptForCorrectRepository(owner, originalRepoInfo) {
     const ITEMS_PER_PAGE = 15;
     let currentPage = 0;
     let selectedRepo = null;
-    
+
     while (selectedRepo === null) {
       const startIdx = currentPage * ITEMS_PER_PAGE;
       const endIdx = Math.min(startIdx + ITEMS_PER_PAGE, allRepos.length);
       const pageRepos = allRepos.slice(startIdx, endIdx);
-      
+
       const hasNextPage = endIdx < allRepos.length;
       const hasPrevPage = currentPage > 0;
-      
+
       // Create choices array with pagination controls
       const choices = [
-        ...pageRepos.map(repo => ({ 
+        ...pageRepos.map((repo) => ({
           name: repo.name,
-          value: repo.name
-        }))
+          value: repo.name,
+        })),
       ];
-      
+
       // Add pagination controls
       const paginationChoices = [];
       if (hasPrevPage) {
-        paginationChoices.push({ name: '⬅️ Previous page', value: 'prev' });
+        paginationChoices.push({ name: "⬅️ Previous page", value: "prev" });
       }
       if (hasNextPage) {
-        paginationChoices.push({ name: '➡️ Next page', value: 'next' });
+        paginationChoices.push({ name: "➡️ Next page", value: "next" });
       }
-      
+
       // Add manual entry option
-      paginationChoices.push({ name: '✏️ Enter manually', value: 'manual' });
-      
+      paginationChoices.push({ name: "✏️ Enter manually", value: "manual" });
+
       // Add pagination controls and manual entry
       if (paginationChoices.length > 0) {
-        choices.push({ type: 'separator', line: '─'.repeat(20) });
+        choices.push({ type: "separator", line: "─".repeat(20) });
         choices.push(...paginationChoices);
       }
-      
+
       // Show page info
       const pageInfo = `Page ${currentPage + 1}/${Math.ceil(allRepos.length / ITEMS_PER_PAGE)}`;
-      
+
       // Ask user to select repository
       const { selection } = await prompt({
-        type: 'select',
-        name: 'selection',
+        type: "select",
+        name: "selection",
         message: `Select the correct repository (${pageInfo}):`,
-        choices: choices
+        choices: choices,
       });
-      
+
       // Handle navigation and selection
-      if (selection === 'prev') {
+      if (selection === "prev") {
         currentPage--;
-      } else if (selection === 'next') {
+      } else if (selection === "next") {
         currentPage++;
-      } else if (selection === 'manual') {
+      } else if (selection === "manual") {
         return await promptForManualRepository(owner, originalRepoInfo);
       } else {
         selectedRepo = selection;
       }
     }
 
-    console.log(chalk.green(`\n✓ Selected repository: ${chalk.blue(selectedRepo)}\n`));
+    console.log(
+      chalk.green(`\n✓ Selected repository: ${chalk.blue(selectedRepo)}\n`),
+    );
 
     // Get repository details
     const { data } = await octokit.repos.get({
       owner,
-      repo: selectedRepo
+      repo: selectedRepo,
     });
 
     return {
@@ -254,7 +262,9 @@ async function promptForCorrectRepository(owner, originalRepoInfo) {
       apiUrl: data.url,
     };
   } catch (error) {
-    console.error(chalk.red(`\n✗ Error fetching repositories: ${error.message}\n`));
+    console.error(
+      chalk.red(`\n✗ Error fetching repositories: ${error.message}\n`),
+    );
     return await promptForManualRepository(owner, originalRepoInfo);
   }
 }
@@ -266,19 +276,25 @@ async function promptForCorrectRepository(owner, originalRepoInfo) {
  * @returns {Promise<Object>} Corrected repository information
  */
 async function promptForManualRepository(owner, originalRepoInfo) {
-  console.log(chalk.yellow("\nPlease enter your repository information manually:"));
+  console.log(
+    chalk.yellow("\nPlease enter your repository information manually:"),
+  );
 
   const { repoName } = await prompt({
-    type: 'input',
-    name: 'repoName',
+    type: "input",
+    name: "repoName",
     message: `Repository name for ${chalk.blue(owner)}:`,
     initial: originalRepoInfo.repo,
-    validate: value => value ? true : 'Repository name is required'
+    validate: (value) => (value ? true : "Repository name is required"),
   });
 
   try {
-    console.log(chalk.blue(`\nVerifying repository ${chalk.bold(owner + '/' + repoName)}...`));
-    
+    console.log(
+      chalk.blue(
+        `\nVerifying repository ${chalk.bold(owner + "/" + repoName)}...`,
+      ),
+    );
+
     const octokit = new Octokit({
       auth: process.env.GITHUB_TOKEN || global.githubToken,
     });
@@ -286,7 +302,7 @@ async function promptForManualRepository(owner, originalRepoInfo) {
     // Verify the repository exists
     const { data } = await octokit.repos.get({
       owner,
-      repo: repoName
+      repo: repoName,
     });
 
     console.log(chalk.green(`\n✓ Repository verified successfully\n`));
@@ -301,7 +317,9 @@ async function promptForManualRepository(owner, originalRepoInfo) {
       apiUrl: data.url,
     };
   } catch (error) {
-    throw new Error(`Repository ${owner}/${repoName} could not be accessed. Check that it exists and you have permission to access it.`);
+    throw new Error(
+      `Repository ${owner}/${repoName} could not be accessed. Check that it exists and you have permission to access it.`,
+    );
   }
 }
 
