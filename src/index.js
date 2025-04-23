@@ -11,20 +11,6 @@ import { analyzeDiffs } from "./ai/analyzer.js";
 import { postComments } from "./github/comments.js";
 import { getCacheManager } from "./utils/cache.js";
 
-// Create a stylish title banner
-const createBanner = () => {
-  const title = gradient.pastel.multiline([
-    "  _____ _____ _____ _____ _____ ______   _____ _______ _    _ _____ _____ _____ ",
-    " / ____/ ____|  __ \\_   _|_   _|  ____| / ____|__   __| |  | |  __ \\_   _/ ____|",
-    "| |   | |    | |__) || |   | | | |__   | (___    | |  | |  | | |  | || || |  __ ",
-    "| |   | |    |  ___/ | |   | | |  __|   \\___ \\   | |  | |  | | |  | || || | |_ |",
-    "| |___| |____| |    _| |_ _| |_| |____  ____) |  | |  | |__| | |__| || || |__| |",
-    " \\_____\\_____|_|   |_____|_____|______||_____/   |_|   \\____/|_____/_____\\_____|"
-  ].join('\n'));
-  
-  return title;
-};
-
 // Format a message in a styled box
 const boxMessage = (message, title = null, type = 'info') => {
   const colors = {
@@ -54,8 +40,7 @@ const boxMessage = (message, title = null, type = 'info') => {
  * @returns {Promise<void>}
  */
 export async function run(options) {
-  // Display banner
-  console.log(createBanner());
+  // Display welcome message
   console.log(boxMessage('An AI-powered tool for analyzing git diffs and posting comments to GitHub', 'Welcome to CommitStudio', 'info'));
   
   let spinner = ora("Initializing CommitStudio...").start();
