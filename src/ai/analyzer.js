@@ -256,80 +256,32 @@ If relevant, mention best practices and why they matter.`;
       diffTruncated = true;
     }
     
-    // Check if the openai instance supports the responses API (newer versions)
-    if (openai.responses && typeof openai.responses.create === 'function') {
-      console.log(chalk.blue("Using OpenAI Responses API with web search capability"));
-      
-      try {
-        // Call OpenAI Responses API with GPT-4.1
-        const response = await openai.responses.create({
-          model: "gpt-4.1-mini",
-          input: [
-            {
-              role: "system",
-              content: [
-                {
-                  type: "input_text",
-                  text: systemPrompt
-                }
-              ]
-            },
-            {
-              role: "user",
-              content: [
-                {
-                  type: "input_text",
-                  text: `Commit: ${commit.message}\n\nDiff:${diffTruncated ? ' (truncated due to large size)\n' : '\n'}\`\`\`diff\n${truncatedDiff}\n\`\`\``
-                }
-              ]
-            }
-          ],
-          text: {
-            format: {
-              type: "text"
-            }
-          },
-          reasoning: {},
-          tools: [
-            {
-              type: "web_search_preview",
-              user_location: {
-                type: "approximate"
-              },
-              search_context_size: "medium"
-            }
-          ],
-          temperature: 0.3,
-          max_output_tokens: 3000,
-          top_p: 1,
-          store: true
-        });
-        
-        // Handle the response structure correctly
-        // The Responses API provides text in response.output.text
-        const analysisText = response.output?.text || '';
-        
-        if (!analysisText) {
-          console.warn(chalk.yellow("Received empty response from Responses API. Falling back to Chat Completions API."));
-          return await useCompletionsAPI(openai, commit, truncatedDiff, diffTruncated);
-        }
-        
-        // Add note about truncation if diff was truncated
-        let result = parseAnalysisResponse(analysisText);
-        if (diffTruncated) {
-          result.summary = `[Note: This analysis is based on a truncated diff due to size limits] ${result.summary}`;
-        }
-        
-        return result;
-      } catch (error) {
-        console.error(`Error using Responses API: ${error.message}. Falling back to Chat Completions API.`);
-        // Fall back to the older Chat Completions API
-        return await useCompletionsAPI(openai, commit, truncatedDiff, diffTruncated);
-      }
-    } else {
-      // Use the older Chat Completions API if Responses API is not available
-      return await useCompletionsAPI(openai, commit, truncatedDiff, diffTruncated);
+    // Use the reliable Chat Completions API
+    console.log(chalk.blue("Using Chat Completions API for code analysis"));
+    const response = await openai.chat.completions.create({
+      model: "gpt-4.1-mini", // Using GPT-4.1-mini for code analysis
+      messages: [
+        { role: "system", content: systemPrompt },
+        {
+          role: "user",
+          content: `Commit: ${commit.message}\n\nDiff:${diffTruncated ? ' (truncated due to large size)\n' : '\n'}\`\`\`diff\n${truncatedDiff}\n\`\`\``,
+        },
+      ],
+      temperature: 0.3, // Lower temperature for more focused analysis
+      max_tokens: 2000,
+    });
+
+    // Extract and parse the assistant's response
+    const analysisText = response.choices[0].message.content;
+    
+    // Add note about truncation if diff was truncated
+    let result = parseAnalysisResponse(analysisText);
+    if (diffTruncated) {
+      result.summary = `[Note: This analysis is based on a truncated diff due to size limits] ${result.summary}`;
     }
+
+    return result;
+    
   } catch (error) {
     console.error(`Error analyzing commit ${commit.sha}: ${error.message}`);
 
@@ -343,61 +295,13 @@ If relevant, mention best practices and why they matter.`;
 }
 
 /**
- * Use the older Chat Completions API for models that don't support the Responses API
- * @param {Object} openai - OpenAI client instance
- * @param {Object} commit - Commit metadata
- * @param {string} truncatedDiff - The (potentially truncated) diff content
- * @param {boolean} diffTruncated - Whether the diff was truncated
- * @returns {Promise<Object>} Analysis result
- */
-async function useCompletionsAPI(openai, commit, truncatedDiff, diffTruncated) {
-  const systemPrompt = `You are a helpful programming assistant specializing in code review.
-You will be given a git diff from a commit along with the commit message.
-Your task is to analyze the code changes and provide thoughtful, constructive feedback.
-
-Please respond with:
-1. A brief summary of the changes
-2. Specific comments on the code changes, including potential issues, bugs, or improvements
-3. Suggestions for future improvements if applicable
-
-Format your comments to be helpful and constructive. Focus on meaningful insights rather than trivial issues.
-If relevant, mention best practices and why they matter.`;
-
-  // Call OpenAI API with diff and commit info
-  console.log(chalk.yellow("Using Chat Completions API (fallback)"));
-  const response = await openai.chat.completions.create({
-    model: "gpt-4o", // Fallback to GPT-4o if GPT-4.1 is not available
-    messages: [
-      { role: "system", content: systemPrompt },
-      {
-        role: "user",
-        content: `Commit: ${commit.message}\n\nDiff:${diffTruncated ? ' (truncated due to large size)\n' : '\n'}\`\`\`diff\n${truncatedDiff}\n\`\`\``,
-      },
-    ],
-    temperature: 0.3, // Lower temperature for more focused analysis
-    max_tokens: 2000,
-  });
-
-  // Extract and parse the assistant's response
-  const analysisText = response.choices[0].message.content;
-  
-  // Add note about truncation if diff was truncated
-  let result = parseAnalysisResponse(analysisText);
-  if (diffTruncated) {
-    result.summary = `[Note: This analysis is based on a truncated diff due to size limits] ${result.summary}`;
-  }
-
-  return result;
-}
-
-/**
  * Parse the AI response into structured data
  * @param {string} text - AI response text
  * @returns {Object} Structured analysis
  */
 function parseAnalysisResponse(text) {
   // Ensure we have a string to work with
-  if (!text || typeof text !== 'string') {
+  if (text === null || text === undefined) {
     return {
       summary: "Error parsing AI response: No valid text provided",
       comments: [],
@@ -413,6 +317,11 @@ function parseAnalysisResponse(text) {
   };
 
   try {
+    // Empty string should return empty result
+    if (text.trim() === "") {
+      return result;
+    }
+
     // Extract summary (usually the first paragraph)
     const summaryMatch = text.match(/^(.+?)(?=\n\n|\n###|\n##|$)/s);
     if (summaryMatch) {
