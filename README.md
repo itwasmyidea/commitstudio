@@ -1,22 +1,22 @@
-# CommitStudio
+# CommitStudio ✨
 
 [![npm version](https://img.shields.io/npm/v/commitstudio.svg?style=flat-square)](https://www.npmjs.com/package/commitstudio)
 [![npm downloads](https://img.shields.io/npm/dm/commitstudio.svg?style=flat-square)](https://www.npmjs.com/package/commitstudio)
 
-An AI-powered tool that automatically analyzes git diffs and posts insightful comments to your GitHub commits.
+> AI-powered git diffs analysis and commenting.
 
 CommitStudio provides code review comments on your commits with minimal human intervention by leveraging OpenAI's capabilities to analyze code changes. It identifies potential issues, bugs, and best practices, all while providing constructive feedback.
 
 ## Features
 
 - **Auto-detect Repository**: Works with local git repositories, automatically connects to GitHub
-- **Smart Analysis**: Uses OpenAI's latest GPT-4.1 model to analyze commit diffs with deep understanding of code
-- **Web Search Support**: Leverages internet access to provide more contextual and informed code reviews
-- **GitHub Integration**: Posts AI-generated comments directly to commits
-- **Caching**: Remembers processed commits to avoid duplicate comments
+- **Smart Analysis**: Uses OpenAI's GPT-4.1-mini model to analyze git diffs and generate insightful comments.
+- **GitHub Integration**: Seamlessly post comments to GitHub pull requests.
+- **Caching**: Smart caching to avoid repeated analyses.
 - **Interactive CLI**: Easy-to-use command line interface with helpful prompts
 - **Secure Credentials Management**: Securely handles GitHub and OpenAI API keys
 - **Parallel Processing**: Efficiently processes multiple commits at once
+- **Flexible Options**: Analyze specific commits, branches, or time periods.
 
 ## Installation
 
@@ -58,49 +58,20 @@ export GITHUB_CLIENT_ID=your_client_id
 
 ## Usage
 
-Navigate to your git repository and run:
-
 ```bash
-commitstudio
+commitstudio [options]
 ```
 
-This will:
+### Options
 
-1. Detect your GitHub repository
-2. Fetch all commits
-3. Analyze the diffs with OpenAI
-4. Post comments to GitHub
-
-### Command Options
-
-```bash
-# Analyze specific number of commits
-commitstudio --commits 5
-
-# Analyze a specific branch
-commitstudio --branch feature/my-feature
-
-# Analyze commits since a specific date
-commitstudio --since "2023-01-01"
-
-# Analyze commits by a specific author
-commitstudio --author "user@example.com"
-
-# Dry run (analyze but don't post comments)
-commitstudio --dry-run
-
-# Ignore cache and reanalyze all commits
-commitstudio --no-cache
-
-# Specify repository path
-commitstudio --path /path/to/repo
-
-# Show detailed logs
-commitstudio --verbose
-
-# Clear all saved settings and credentials
-commitstudio --reset
-```
+- `-p, --path <path>`: Path to the git repository (default: current directory)
+- `-c, --commits <number>`: Number of commits to analyze (default: all)
+- `-b, --branch <branch>`: Branch to analyze (default: current branch)
+- `--since <date>`: Analyze commits since date
+- `--author <email>`: Filter commits by author email
+- `--no-cache`: Ignore cache and reanalyze all commits
+- `--dry-run`: Run without posting comments to GitHub
+- `--verbose`: Show detailed logs
 
 ## Managing Your Configuration
 
