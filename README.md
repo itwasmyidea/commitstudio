@@ -1,9 +1,9 @@
 # CommitStudio ✨
 
-![CommitStudio Hero](./assets/hero.png)
-
 [![npm version](https://img.shields.io/npm/v/commitstudio.svg?style=flat-square)](https://www.npmjs.com/package/commitstudio)
 [![npm downloads](https://img.shields.io/npm/dm/commitstudio.svg?style=flat-square)](https://www.npmjs.com/package/commitstudio)
+
+![CommitStudio Hero](./assets/hero.png)
 
 > AI-powered git diffs analysis and commenting.
 
