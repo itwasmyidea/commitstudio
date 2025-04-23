@@ -11,16 +11,7 @@ import chalk from "chalk";
  * @returns {Promise<Array>} Posted comments
  */
 export async function postComments({ results, owner, repo, onProgress }) {
-  if (!process.env.GITHUB_TOKEN) {
-    console.log(
-      chalk.yellow(
-        "Warning: No GitHub token found in environment. Using the config token.",
-      ),
-    );
-    // We will use the token from config, which is already validated in the main flow
-  }
-
-  // Use global token from successful authentication
+  // Determine which token to use - environment variable or saved token
   const token = process.env.GITHUB_TOKEN || global.githubToken;
 
   if (!token) {
@@ -163,14 +154,12 @@ function formatCommentBody(result) {
  * @returns {Promise<boolean>} True if comment exists
  */
 export async function checkCommentExists(commitSha, owner, repo) {
-  if (!process.env.GITHUB_TOKEN && !global.githubToken) {
-    console.log(
-      chalk.yellow("No GitHub token available. Assuming no existing comments."),
-    );
+  const token = process.env.GITHUB_TOKEN || global.githubToken;
+  
+  if (!token) {
+    // If no token is available, we can't check for existing comments
     return false;
   }
-
-  const token = process.env.GITHUB_TOKEN || global.githubToken;
 
   try {
     const octokit = new Octokit({

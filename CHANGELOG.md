@@ -14,6 +14,8 @@ All notable changes to CommitStudio will be documented in this file.
 - Improved error handling throughout the application
 - Implemented character limit handling for GitHub comments
 - Fixed OpenAI API key usage to properly use stored credentials
+- Removed confusing warning messages about token usage
+- Added automatic truncation of large diffs to prevent OpenAI rate limit errors
 
 ### Changed
 - Updated authentication workflow for a smoother user experience
