@@ -21,7 +21,10 @@ export async function analyzeDiffs({
   repo,
   onProgress,
 }) {
-  if (!process.env.OPENAI_API_KEY) {
+  // Use global openaiApiKey if it exists, or check environment variable
+  const apiKey = global.openaiApiKey || process.env.OPENAI_API_KEY;
+  
+  if (!apiKey) {
     console.log(
       chalk.yellow(
         "Warning: OpenAI API key is not available. Using mock analysis mode.",
@@ -38,7 +41,7 @@ export async function analyzeDiffs({
 
   try {
     const openai = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY,
+      apiKey: apiKey,
       dangerouslyAllowBrowser: true, // For browser support
     });
 

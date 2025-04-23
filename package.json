@@ -1,6 +1,6 @@
 {
   "name": "commitstudio",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "An AI-powered tool that analyzes git diffs and posts insightful comments to GitHub",
   "type": "module",
   "bin": {
@@ -11,14 +11,16 @@
     "node": ">=18.0.0"
   },
   "scripts": {
-    "start": "node ./bin/cli.js",
+    "start": "node --no-deprecation ./bin/cli.js",
+    "start:debug": "node --trace-deprecation ./bin/cli.js",
     "test": "vitest run",
     "test:watch": "vitest",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
     "prepare": "husky install",
-    "prepublishOnly": "npm run test",
+    "pre-publish-check": "node ./scripts/pre-publish-check.js",
+    "prepublishOnly": "npm run pre-publish-check && npm run test",
     "version": "npm run format && git add -A src",
     "postversion": "git push && git push --tags"
   },
@@ -82,6 +84,7 @@
     "bin/",
     "src/",
     "README.md",
+    "CHANGELOG.md",
     "LICENSE"
   ]
 }

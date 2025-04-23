@@ -1,8 +1,13 @@
 #!/usr/bin/env node
 
+// Note: This CLI might show DEP0040 punycode deprecation warnings due to dependencies.
+// To suppress these warnings, run with the --no-deprecation flag:
+// node --no-deprecation ./bin/cli.js
+// or use the npm start script which includes this flag.
+
 import { Command } from "commander";
 import chalk from "chalk";
-import { loadConfig } from "../src/config/config.js";
+import { loadConfig, clearConfig } from "../src/config/config.js";
 import { run } from "../src/index.js";
 
 // Ensure unhandled errors don't crash the process without feedback
@@ -18,7 +23,7 @@ program
   .description(
     "AI-powered tool that analyzes git diffs and posts comments to GitHub",
   )
-  .version("0.1.0")
+  .version("0.1.6")
   .option(
     "-p, --path <path>",
     "Path to git repository (defaults to current directory)",
@@ -36,8 +41,16 @@ program
   .option("--no-cache", "Ignore cache and reanalyze all commits")
   .option("--dry-run", "Run analysis but don't post comments to GitHub")
   .option("--verbose", "Show detailed logs")
+  .option("--reset", "Clear all saved settings and credentials")
   .action(async (options) => {
     try {
+      // Handle reset flag
+      if (options.reset) {
+        clearConfig();
+        console.log(chalk.green("✓ All settings and credentials have been cleared."));
+        return;
+      }
+      
       // Load configuration from environment and config files
       const config = await loadConfig();
 

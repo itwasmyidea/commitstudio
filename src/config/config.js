@@ -53,14 +53,31 @@ const configStore = new Conf({
  * @returns {Promise<Object>} Validated configuration
  */
 export async function loadConfig() {
+  // Get values from config store
+  const githubToken = configStore.get("github.token");
+  const openaiApiKey = configStore.get("openai.apiKey");
+  
   // Priority: CLI options > env vars > config store
   const config = {
-    githubToken: process.env.GITHUB_TOKEN || configStore.get("githubToken"),
-    openaiApiKey: process.env.OPENAI_API_KEY || configStore.get("openaiApiKey"),
+    github: {
+      token: process.env.GITHUB_TOKEN || githubToken
+    },
+    openai: {
+      apiKey: process.env.OPENAI_API_KEY || openaiApiKey
+    },
     cacheEnabled: configStore.get("cacheEnabled"),
     cachePath: configStore.get("cachePath"),
     maxConcurrent: configStore.get("maxConcurrent"),
   };
+  
+  // Set global variables for other modules to use directly
+  if (config.github?.token) {
+    global.githubToken = config.github.token;
+  }
+  
+  if (config.openai?.apiKey) {
+    global.openaiApiKey = config.openai.apiKey;
+  }
 
   // Always return the config, let validate.js handle the validation and prompting
   return config;
@@ -71,8 +88,18 @@ export async function loadConfig() {
  * @param {Object} config - Configuration to save
  */
 export function saveConfig(config) {
+  // Handle nested properties
+  if (config.github?.token) {
+    configStore.set("github.token", config.github.token);
+  }
+  
+  if (config.openai?.apiKey) {
+    configStore.set("openai.apiKey", config.openai.apiKey);
+  }
+  
+  // Handle flat properties
   for (const [key, value] of Object.entries(config)) {
-    if (value !== undefined) {
+    if (value !== undefined && typeof value !== 'object') {
       configStore.set(key, value);
     }
   }

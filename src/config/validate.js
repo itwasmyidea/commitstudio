@@ -1,75 +1,152 @@
 import { Octokit } from "@octokit/rest";
-import OpenAI from "openai";
+import { OpenAI } from "openai";
 import chalk from "chalk";
-import Enquirer from "enquirer";
+import enquirer from "enquirer";
+const { prompt } = enquirer;
 import { saveConfig } from "./config.js";
-
-const { prompt } = Enquirer;
+import { authenticateWithDeviceFlow } from "../github/auth.js";
+import { GITHUB_CLIENT_ID } from "./constants.js";
 
 /**
- * Validate GitHub and OpenAI credentials
- * @param {Object} config - Configuration object
- * @returns {Promise<boolean>} True if credentials are valid
+ * Validates the GitHub and OpenAI credentials in the configuration
+ * @param {Object} config - The configuration object
+ * @returns {Promise<Object>} - The updated configuration object
  */
 export async function validateCredentials(config) {
-  // Check if credentials exist
-  let needsGitHubAuth = false;
-  let needsOpenAIKey = false;
+  let updatedConfig = { ...config };
 
-  if (!config.githubToken) {
-    console.log(chalk.yellow("GitHub token is missing."));
-    needsGitHubAuth = true;
-  }
+  console.log(chalk.blue('Checking credentials...'));
 
-  if (!config.openaiApiKey) {
-    console.log(chalk.yellow("OpenAI API key is missing."));
-    needsOpenAIKey = true;
-  }
-
-  // Clear any spinner text to avoid UI issues
-  console.log("\n");
-
-  // Handle GitHub auth
-  if (needsGitHubAuth) {
-    await promptForGitHubToken(config);
+  // Check if GitHub token is missing
+  if (!updatedConfig.github?.token) {
+    console.log(chalk.yellow('GitHub token is missing'));
+    
+    // Check if we have a valid GitHub client ID for OAuth flow
+    const hasValidClientId = GITHUB_CLIENT_ID && 
+                           GITHUB_CLIENT_ID !== 'YOUR_CLIENT_ID_HERE' &&
+                           GITHUB_CLIENT_ID !== 'YOUR_DEFAULT_CLIENT_ID';
+    
+    if (!hasValidClientId) {
+      console.log(chalk.yellow('No valid GitHub OAuth client ID found. Using manual token entry.'));
+      updatedConfig = await promptForGitHubToken(updatedConfig);
+    } else {
+      // Ask if user wants to use device flow or manual token entry
+      try {
+        const { authMethod } = await prompt({
+          type: 'select',
+          name: 'authMethod',
+          message: 'How would you like to authenticate with GitHub?',
+          choices: [
+            { name: 'browser', message: 'Authenticate via browser (recommended)' },
+            { name: 'manual', message: 'Enter token manually' }
+          ]
+        });
+        
+        if (authMethod === 'browser') {
+          try {
+            const token = await authenticateWithDeviceFlow({
+              clientId: GITHUB_CLIENT_ID,
+              scopes: ['repo']
+            });
+            
+            if (token) {
+              updatedConfig.github = { ...updatedConfig.github, token };
+              await saveConfig(updatedConfig);
+              // Set token in global scope for other modules to use
+              global.githubToken = token;
+              console.log(chalk.green('✓ GitHub token has been saved'));
+            } else {
+              console.log(chalk.red('Failed to obtain GitHub token via device flow'));
+              updatedConfig = await promptForGitHubToken(updatedConfig);
+            }
+          } catch (error) {
+            console.log(chalk.red(`Error during device flow authentication: ${error?.message || 'Unknown error'}`));
+            updatedConfig = await promptForGitHubToken(updatedConfig);
+          }
+        } else {
+          updatedConfig = await promptForGitHubToken(updatedConfig);
+        }
+      } catch (error) {
+        console.log(chalk.red(`Error during authentication selection: ${error?.message || 'Unknown error'}`));
+        console.log(chalk.yellow('Defaulting to manual token entry.'));
+        updatedConfig = await promptForGitHubToken(updatedConfig);
+      }
+    }
   } else {
-    // Validate existing token
+    // Validate the existing GitHub token
     try {
-      await validateGitHubToken(config.githubToken);
+      await validateGitHubToken(updatedConfig.github.token);
+      // Set token in global scope for other modules to use
+      global.githubToken = updatedConfig.github.token;
+      console.log(chalk.green('✓ GitHub token is valid'));
     } catch (error) {
-      console.log(chalk.red(`Existing GitHub token error: ${error.message}`));
-      await promptForGitHubToken(config);
+      console.log(chalk.red(`GitHub token validation failed: ${error.message}`));
+      
+      // Check if we have a valid GitHub client ID for OAuth flow
+      const hasValidClientId = GITHUB_CLIENT_ID && 
+                             GITHUB_CLIENT_ID !== 'YOUR_CLIENT_ID_HERE' &&
+                             GITHUB_CLIENT_ID !== 'YOUR_DEFAULT_CLIENT_ID';
+      
+      if (!hasValidClientId) {
+        console.log(chalk.yellow('No valid GitHub OAuth client ID found. Using manual token entry.'));
+        updatedConfig = await promptForGitHubToken(updatedConfig);
+      } else {
+        // Ask if user wants to use device flow or manual token entry
+        try {
+          const { authMethod } = await prompt({
+            type: 'select',
+            name: 'authMethod',
+            message: 'How would you like to authenticate with GitHub?',
+            choices: [
+              { name: 'browser', message: 'Authenticate via browser (recommended)' },
+              { name: 'manual', message: 'Enter token manually' }
+            ]
+          });
+          
+          if (authMethod === 'browser') {
+            try {
+              const token = await authenticateWithDeviceFlow({
+                clientId: GITHUB_CLIENT_ID,
+                scopes: ['repo']
+              });
+              
+              if (token) {
+                updatedConfig.github = { ...updatedConfig.github, token };
+                await saveConfig(updatedConfig);
+                // Set token in global scope for other modules to use
+                global.githubToken = token;
+                console.log(chalk.green('✓ GitHub token has been saved'));
+              } else {
+                console.log(chalk.red('Failed to obtain GitHub token via device flow'));
+                updatedConfig = await promptForGitHubToken(updatedConfig);
+              }
+            } catch (error) {
+              console.log(chalk.red(`Error during device flow authentication: ${error?.message || 'Unknown error'}`));
+              updatedConfig = await promptForGitHubToken(updatedConfig);
+            }
+          } else {
+            updatedConfig = await promptForGitHubToken(updatedConfig);
+          }
+        } catch (error) {
+          console.log(chalk.red(`Error during authentication selection: ${error?.message || 'Unknown error'}`));
+          console.log(chalk.yellow('Defaulting to manual token entry.'));
+          updatedConfig = await promptForGitHubToken(updatedConfig);
+        }
+      }
     }
   }
 
-  // Make GitHub token available globally for other modules
-  if (config.githubToken) {
-    // Set token in a global variable for other modules to access
-    global.githubToken = config.githubToken;
-
-    // Also set in process.env for modules that expect it there
-    process.env.GITHUB_TOKEN = config.githubToken;
-  }
-
-  // Handle OpenAI key
-  if (needsOpenAIKey) {
-    await promptForOpenAIKey(config);
+  // Check if OpenAI key is missing
+  if (!updatedConfig.openai?.apiKey) {
+    console.log(chalk.yellow('OpenAI API key is missing'));
+    updatedConfig = await promptForOpenAIKey(updatedConfig);
   } else {
-    console.log(chalk.green("Using existing OpenAI API key."));
+    // Set key in global scope for other modules to use
+    global.openaiApiKey = updatedConfig.openai.apiKey;
+    console.log(chalk.green('✓ OpenAI API key is present'));
   }
 
-  // Make OpenAI key available globally for other modules
-  if (config.openaiApiKey) {
-    process.env.OPENAI_API_KEY = config.openaiApiKey;
-  }
-
-  // Save both tokens for future use if they're not already saved
-  saveConfig({
-    githubToken: config.githubToken,
-    openaiApiKey: config.openaiApiKey,
-  });
-
-  return true;
+  return updatedConfig;
 }
 
 /**
@@ -119,18 +196,21 @@ async function promptForGitHubToken(config) {
 
         console.log(chalk.green(`✓ Authenticated as ${data.login} on GitHub`));
 
-        // Store validated token
-        config.githubToken = githubToken;
+        // Store validated token - fixing to use the correct structure
+        if (!config.github) config.github = {};
+        config.github.token = githubToken;
+        // Set token in global scope for other modules to use
+        global.githubToken = githubToken;
         validToken = true;
 
-        // Save token automatically
-        saveConfig({ githubToken });
+        // Save token automatically with the correct structure
+        saveConfig({ github: { token: githubToken } });
         console.log(chalk.green("GitHub token saved for future use."));
       } catch (error) {
         if (attempts < maxAttempts) {
           console.log(
             chalk.red(
-              `GitHub authentication failed: ${error.message || "Unknown error"}`,
+              `GitHub authentication failed: ${error?.message || "Unknown error"}`,
             ),
           );
           console.log(chalk.yellow("Please try again with a valid token."));
@@ -153,10 +233,10 @@ async function promptForGitHubToken(config) {
         }
       }
     } catch (error) {
-      if (!error.message.includes("GitHub authentication failed")) {
+      if (!error?.message?.includes("GitHub authentication failed")) {
         // This is a prompt error, not an auth error
         console.log(
-          chalk.red(`Error during GitHub token prompt: ${error.message}`),
+          chalk.red(`Error during GitHub token prompt: ${error?.message || "Unknown error"}`),
         );
         if (attempts >= maxAttempts) {
           throw error;
@@ -180,23 +260,34 @@ async function promptForOpenAIKey(config) {
   console.log(chalk.dim("Find it at: https://platform.openai.com/api-keys"));
   console.log(chalk.dim("Note: For this app, we will accept any key format\n"));
 
-  const { openaiApiKey } = await prompt({
-    type: "password",
-    name: "openaiApiKey",
-    message: "OpenAI API key:",
-    validate: (value) => {
-      if (!value || value.trim() === "") return "OpenAI API key is required";
-      return true;
-    },
-  });
+  try {
+    const { openaiApiKey } = await prompt({
+      type: "password",
+      name: "openaiApiKey",
+      message: "OpenAI API key:",
+      validate: (value) => {
+        if (!value || value.trim() === "") return "OpenAI API key is required";
+        return true;
+      },
+    });
 
-  // Store the key without validation
-  config.openaiApiKey = openaiApiKey;
-  console.log(chalk.yellow("Accepting OpenAI API key without validation."));
+    // Store the key without validation
+    if (!config.openai) config.openai = {};
+    config.openai.apiKey = openaiApiKey;
+    // Set key in global scope for other modules to use
+    global.openaiApiKey = openaiApiKey;
+    console.log(chalk.yellow("Accepting OpenAI API key without validation."));
 
-  // Save key automatically
-  saveConfig({ openaiApiKey });
-  console.log(chalk.green("OpenAI API key saved for future use."));
+    // Save key automatically
+    saveConfig({ openai: { apiKey: openaiApiKey } });
+    console.log(chalk.green("OpenAI API key saved for future use."));
+    
+    return config;
+  } catch (error) {
+    console.log(chalk.red(`Error during OpenAI key prompt: ${error?.message || "Unknown error"}`));
+    // Return the config without changes if there was an error
+    return config;
+  }
 }
 
 /**

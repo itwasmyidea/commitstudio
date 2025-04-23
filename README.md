@@ -43,6 +43,18 @@ export OPENAI_API_KEY=your_openai_api_key
 
 Or you'll be prompted to enter them when you run the tool.
 
+### GitHub OAuth App (Optional)
+
+If you'd like to use the browser authentication flow instead of manually entering a token:
+
+1. Create a GitHub OAuth App at: https://github.com/settings/developers
+2. Set the Authorization callback URL to: https://github.com/devices
+3. Copy your Client ID and set it as an environment variable:
+
+```bash
+export GITHUB_CLIENT_ID=your_client_id
+```
+
 ## Usage
 
 Navigate to your git repository and run:
@@ -84,12 +96,38 @@ commitstudio --path /path/to/repo
 
 # Show detailed logs
 commitstudio --verbose
+
+# Clear all saved settings and credentials
+commitstudio --reset
 ```
+
+## Managing Your Configuration
+
+CommitStudio securely saves your GitHub token and OpenAI API key to avoid asking for them each time you run the tool. 
+
+### Saved Credentials Location
+
+Your credentials are securely stored in your user directory:
+- **macOS**: `~/Library/Preferences/commitstudio-nodejs`
+- **Linux**: `~/.config/commitstudio`
+- **Windows**: `%APPDATA%\commitstudio-nodejs`
+
+### Resetting Your Configuration
+
+If you need to clear your saved settings:
+
+```bash
+# Use the reset flag
+commitstudio --reset
+```
+
+This will clear all stored tokens and credentials, allowing you to start fresh next time you run the tool.
 
 ## Environment Variables
 
 - `GITHUB_TOKEN`: Your GitHub personal access token
 - `OPENAI_API_KEY`: Your OpenAI API key
+- `GITHUB_CLIENT_ID`: (Optional) Client ID for GitHub OAuth App to enable browser authentication
 
 ## Example Output
 
@@ -107,6 +145,23 @@ commitstudio --verbose
   ↪ Posted comment on commit i7j8k9l
   ↪ Posted comment on commit m0n1o2p
 ✓ CommitStudio completed successfully!
+```
+
+## Troubleshooting
+
+### Node.js Deprecation Warnings
+
+If you see DEP0040 punycode deprecation warnings when running CommitStudio, these are from dependencies and don't affect functionality. To suppress these warnings, you can:
+
+```bash
+# Use the npm start script (includes the --no-deprecation flag)
+npm start
+
+# Or run with the flag directly
+node --no-deprecation ./bin/cli.js
+
+# For detailed diagnostics 
+npm run start:debug
 ```
 
 ## How It Works
