@@ -1,6 +1,6 @@
 {
   "name": "commitstudio",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "An AI-powered tool that analyzes git diffs and posts insightful comments to GitHub",
   "type": "module",
   "bin": {

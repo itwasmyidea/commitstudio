@@ -86,6 +86,8 @@ commitstudio [options]
 commitstudio yolo [options]
 ```
 
+> **Note:** YOLO mode requires a clean working tree. Commit or stash any changes before running.
+
 #### YOLO Options
 
 - `-p, --path <path>`: Path to the git repository (default: current directory)

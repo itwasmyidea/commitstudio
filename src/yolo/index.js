@@ -212,30 +212,65 @@ async function modifyCommitMessages({ options, owner, repo, branch, repoPath }) 
   // Apply changes if not in dry-run mode
   if (!options.dryRun && results.some(r => r.newMessage)) {
     if (await confirmChanges()) {
-      spinner.start("Applying new commit messages...");
-      
-      let successCount = 0;
-      for (const result of results) {
-        if (result.newMessage) {
-          try {
-            await git.raw(['filter-branch', '--msg-filter', 
-              `if [ "$GIT_COMMIT" = "${result.sha}" ]; then echo "${result.newMessage.replace(/"/g, '\\"')}"; else cat; fi`,
-              '--force', result.sha + '^..HEAD']);
-            successCount++;
-          } catch (error) {
-            console.error(`Failed to update commit ${result.sha.substring(0,7)}: ${error.message}`);
+      // Check for unstaged changes before proceeding
+      try {
+        const status = await git.status();
+        
+        if (status.files.length > 0) {
+          console.error(boxMessage(
+            "Cannot modify commit messages: You have unstaged changes in your repository.\nPlease commit or stash your changes before running YOLO mode.", 
+            "⚠️ Error: Unstaged Changes ⚠️", 
+            "error"
+          ));
+          return;
+        }
+        
+        // Set environment variable to suppress filter-branch warning
+        process.env.FILTER_BRANCH_SQUELCH_WARNING = 1;
+        
+        spinner.start("Applying new commit messages...");
+        
+        let successCount = 0;
+        for (const result of results) {
+          if (result.newMessage) {
+            try {
+              // Escape special characters in commit message
+              const escapedMessage = result.newMessage
+                .replace(/"/g, '\\"')      // Double quotes
+                .replace(/`/g, '\\`')      // Backticks
+                .replace(/\$/g, '\\$')     // Dollar signs
+                .replace(/!/g, '\\!')      // Exclamation marks
+                .replace(/\r/g, '')        // Remove carriage returns
+                .replace(/\n/g, '\\n');    // Escape newlines
+              
+              await git.raw([
+                'filter-branch',
+                '--force',
+                '--msg-filter',
+                `if [ "$GIT_COMMIT" = "${result.sha}" ]; then echo "${escapedMessage}"; else cat; fi`,
+                result.sha + '^..HEAD'
+              ]);
+              
+              successCount++;
+            } catch (error) {
+              spinner.stop();
+              console.error(`Failed to update commit ${result.sha.substring(0,7)}: ${error.message}`);
+            }
           }
         }
-      }
-      
-      spinner.succeed(`Updated ${successCount} commit messages`);
-      
-      if (successCount > 0) {
-        console.log(boxMessage(
-          "Commit messages have been updated. You may need to force push with:\ngit push --force", 
-          "⚠️ IMPORTANT ⚠️", 
-          "warning"
-        ));
+        
+        spinner.succeed(`Updated ${successCount} commit messages`);
+        
+        if (successCount > 0) {
+          console.log(boxMessage(
+            "Commit messages have been updated. You may need to force push with:\ngit push --force", 
+            "⚠️ IMPORTANT ⚠️", 
+            "warning"
+          ));
+        }
+      } catch (error) {
+        spinner.fail("Failed to modify commit messages");
+        console.error(chalk.red(`Error: ${error.message}`));
       }
     } else {
       console.log(boxMessage("No changes were made to commit messages", "Cancelled", "info"));

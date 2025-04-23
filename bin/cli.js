@@ -24,7 +24,7 @@ program
   .description(
     "AI-powered tool that analyzes git diffs and posts comments to GitHub",
   )
-  .version("0.3.0")
+  .version("0.3.1")
   .option(
     "-p, --path <path>",
     "Path to git repository (defaults to current directory)",
@@ -71,7 +71,7 @@ program.action(async (options) => {
 // Add 'yolo' command to modify commit messages
 program
   .command('yolo')
-  .description('Analyze git diffs and modify commit messages with AI-generated ones')
+  .description('Analyze git diffs and modify commit messages with AI-generated ones (requires clean working tree)')
   .option(
     "-p, --path <path>",
     "Path to git repository (defaults to current directory)",

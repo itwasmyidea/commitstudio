@@ -2,6 +2,14 @@
 
 All notable changes to CommitStudio will be documented in this file.
 
+## [0.3.1] - 2025-04-24
+
+### Fixed
+- YOLO mode now properly checks for unstaged changes before attempting to modify commit messages
+- Improved error handling in git operations when modifying commit history
+- Better escaping of special characters in generated commit messages
+- Added clear documentation about clean working tree requirement for YOLO mode
+
 ## [0.3.0] - 2025-04-24
 
 ### Added
