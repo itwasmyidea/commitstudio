@@ -2,6 +2,24 @@
 
 All notable changes to CommitStudio will be documented in this file.
 
+## [0.2.1] - 2025-04-24
+
+### Changed
+- Removed unnecessary console log messages for cleaner output
+- Added pnpm installation instructions to README for more installation options
+
+## [0.2.0] - 2025-04-23
+
+### Changed
+- Simplified API approach focusing on reliability with Chat Completions API
+- Using the powerful GPT-4.1-mini model for more accurate code analysis
+- Improved error handling throughout the application
+
+### Fixed
+- Resolved issues with API compatibility
+- Enhanced error handling for more reliable operation
+- Fixed test suite to ensure code quality
+
 ## [0.1.9] - 2025-04-23
 
 ### Fixed
