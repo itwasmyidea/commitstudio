@@ -3,14 +3,22 @@ import chalk from "chalk";
 
 /**
  * Post AI-generated comments to GitHub commits
+ * @param {Array} results - Analysis results to post
  * @param {Object} options - Options for posting comments
- * @param {Array} options.results - Analysis results to post
  * @param {string} options.owner - Repository owner
  * @param {string} options.repo - Repository name
+ * @param {boolean} [options.dryRun] - Whether to skip posting comments
  * @param {Function} [options.onProgress] - Progress callback
  * @returns {Promise<Array>} Posted comments
  */
-export async function postComments({ results, owner, repo, onProgress }) {
+export async function postComments(results, options) {
+  const { owner, repo, dryRun, onProgress } = options;
+  
+  // Skip posting if in dry run mode
+  if (dryRun) {
+    return [];
+  }
+  
   // Determine which token to use - environment variable or saved token
   const token = process.env.GITHUB_TOKEN || global.githubToken;
 

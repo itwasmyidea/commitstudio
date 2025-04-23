@@ -34,123 +34,172 @@ export async function run(options) {
     // Auto-detect repository if path not specified
     spinner = ora("Detecting repository...").start();
     const repoPath = options.path || process.cwd();
-    const repoInfo = await detectRepository(repoPath);
-    spinner.succeed(`Repository detected: ${chalk.blue(repoInfo.name)}`);
-
-    // Get more detailed repository information from GitHub
-    spinner = ora("Fetching repository details...").start();
-    const { owner, repo, defaultBranch } = await getRepositoryInfo(repoInfo);
-    spinner.succeed(
-      `Repository: ${chalk.blue(`${owner}/${repo}`)} (default branch: ${defaultBranch})`,
-    );
-
-    // Determine which branch to analyze
-    const branch = options.branch || defaultBranch;
-
-    // Set up the main workflow as a list of tasks
-    const tasks = new Listr(
-      [
-        {
-          title: `Fetching commits from ${chalk.blue(branch)}`,
-          task: async (ctx) => {
-            ctx.commits = await getCommits({
-              owner,
-              repo,
-              branch,
-              path: repoPath,
-              maxCount: options.commits,
-              since: options.since,
-              author: options.author,
-            });
-
-            // Filter out already processed commits if cache is enabled
-            if (options.cache !== false) {
-              const originalCount = ctx.commits.length;
-              ctx.commits = ctx.commits.filter(
-                (commit) => !cacheManager.isProcessed(commit.sha),
-              );
-              const filteredCount = originalCount - ctx.commits.length;
-
-              if (filteredCount > 0) {
-                return `Found ${ctx.commits.length} new commits (${filteredCount} already processed)`;
-              }
-            }
-
-            return `Found ${ctx.commits.length} commits to analyze`;
-          },
-        },
-        {
-          title: "Analyzing diffs with AI",
-          skip: (ctx) => ctx.commits.length === 0 && "No commits to analyze",
-          task: async (ctx, task) => {
-            try {
-              ctx.results = await analyzeDiffs({
-                commits: ctx.commits,
-                repoPath,
-                owner,
-                repo,
-                onProgress: (current, total) => {
-                  task.output = `Analyzing commit ${current}/${total}`;
-                },
-              });
-
-              return `Analyzed ${ctx.results.length} commits`;
-            } catch (error) {
-              return `Error during analysis: ${error.message}`;
-            }
-          },
-        },
-        {
-          title: "Posting comments to GitHub",
-          skip: (ctx) =>
-            (ctx.commits.length === 0 && "No commits to analyze") ||
-            (options.dryRun &&
-              "Dry run mode enabled - skipping comment posting"),
-          task: async (ctx, task) => {
-            await postComments({
-              results: ctx.results,
-              owner,
-              repo,
-              onProgress: (current, total) => {
-                task.output = `Posting comment ${current}/${total}`;
-              },
-            });
-
-            // Mark commits as processed in cache
-            if (options.cache !== false) {
-              ctx.commits.forEach((commit) =>
-                cacheManager.markAsProcessed(commit.sha),
-              );
-            }
-
-            return `Posted ${ctx.results.length} comments`;
-          },
-        },
-      ],
-      {
-        renderer: options.verbose ? "verbose" : "default",
-        exitOnError: false, // Continue even if there are errors
-      },
-    );
-
-    const results = await tasks.run();
-
-    if (results.commits && results.commits.length === 0) {
-      console.log(
-        chalk.yellow(
-          "No new commits to analyze. All commits have been processed already.",
-        ),
+    
+    try {
+      const repoInfo = await detectRepository(repoPath);
+      spinner.succeed(`Repository detected: ${chalk.blue(repoInfo.name)}`);
+      
+      // Get more detailed repository information from GitHub
+      spinner = ora("Fetching repository details...").start();
+      const { owner, repo, defaultBranch } = await getRepositoryInfo(repoInfo);
+      spinner.succeed(
+        `Repository: ${chalk.blue(`${owner}/${repo}`)} (default branch: ${defaultBranch})`,
       );
-      console.log(chalk.dim("Use --no-cache to reanalyze all commits."));
-    } else if (options.dryRun) {
-      console.log(
-        chalk.yellow("Dry run completed. No comments were posted to GitHub."),
-      );
-    } else {
-      console.log(chalk.green("✓ CommitStudio completed successfully!"));
+      
+      // Determine which branch to analyze
+      const branch = options.branch || defaultBranch;
+      
+      // Continue with the rest of the workflow
+      await processRepository({
+        options,
+        owner,
+        repo,
+        branch,
+        repoPath,
+        cacheManager
+      });
+    } catch (error) {
+      spinner.fail(`Repository detection failed: ${error.message}`);
+      console.error(chalk.red(
+        "Could not detect or access a valid GitHub repository. Make sure you're in a git repository connected to GitHub, or specify a path with --path."
+      ));
+      process.exit(1);
     }
   } catch (error) {
-    spinner.fail(chalk.red("Error: ") + error.message);
-    throw error;
+    spinner.fail(`Error: ${error.message}`);
+    
+    if (options.verbose && error.stack) {
+      console.error(chalk.dim(error.stack));
+    }
+    
+    process.exit(1);
   }
+}
+
+/**
+ * Process a repository once it's been correctly identified
+ * @param {Object} params - Processing parameters
+ * @param {Object} params.options - Original CLI options
+ * @param {string} params.owner - Repository owner
+ * @param {string} params.repo - Repository name
+ * @param {string} params.branch - Branch to analyze
+ * @param {string} params.repoPath - Path to local repository
+ * @param {Object} params.cacheManager - Cache manager instance
+ * @returns {Promise<void>}
+ */
+async function processRepository({ options, owner, repo, branch, repoPath, cacheManager }) {
+  // Get commits to analyze
+  const spinner = ora(`Fetching commits from ${branch}...`).start();
+  
+  const commitOptions = {
+    owner,
+    repo,
+    branch,
+    path: repoPath,
+    maxCount: options.commits,
+    since: options.since,
+    author: options.author,
+  };
+  
+  const allCommits = await getCommits(commitOptions);
+  
+  // Filter out already processed commits if cache is enabled
+  let commitsToProcess = allCommits;
+  
+  if (options.cache !== false) {
+    commitsToProcess = allCommits.filter(
+      (commit) => !cacheManager.isCommitProcessed(commit.sha),
+    );
+    
+    spinner.succeed(
+      `Found ${chalk.blue(allCommits.length)} commits to analyze (${
+        allCommits.length - commitsToProcess.length
+      } already processed)`,
+    );
+  } else {
+    spinner.succeed(
+      `Found ${chalk.blue(allCommits.length)} commits to analyze (cache disabled)`,
+    );
+  }
+  
+  if (commitsToProcess.length === 0) {
+    console.log(chalk.green("✓ All commits have already been analyzed"));
+    return;
+  }
+  
+  // Run analyses with AI
+  spinner.start("Analyzing diffs with AI...");
+  
+  let currentCommit = 1;
+  const onProgress = (current, total) => {
+    spinner.text = `Analyzing diffs with AI... ${current}/${total}`;
+    currentCommit = current;
+  };
+  
+  const analysisResults = await analyzeDiffs({
+    commits: commitsToProcess,
+    repoPath,
+    owner,
+    repo,
+    onProgress,
+  });
+  
+  spinner.succeed(`${chalk.green("✓")} Analyzed ${currentCommit} commits`);
+  
+  // Skip posting comments if in dry-run mode
+  if (options.dryRun) {
+    console.log(
+      chalk.blue("Dry run mode:"),
+      "Skipping posting comments to GitHub",
+    );
+    
+    // Display a summary of what would be posted
+    console.log(chalk.blue("\nAnalysis summary:"));
+    
+    for (const result of analysisResults) {
+      console.log(
+        `\n${chalk.bold("Commit:")} ${result.commitSha.substring(0, 7)} - ${
+          result.commitMessage
+        }`,
+      );
+      console.log(`${chalk.bold("Summary:")} ${result.summary}`);
+      
+      if (result.suggestions.length > 0) {
+        console.log(chalk.bold("\nSuggestions:"));
+        result.suggestions.forEach((s) => console.log(`- ${s}`));
+      }
+    }
+    
+    return;
+  }
+  
+  // Post comments to GitHub
+  spinner.start("Posting comments to GitHub...");
+  
+  let postedCount = 0;
+  const postOptions = {
+    owner,
+    repo,
+    dryRun: options.dryRun,
+    onProgress: () => {
+      postedCount++;
+      spinner.text = `Posting comments to GitHub... ${postedCount}/${analysisResults.length}`;
+    },
+  };
+  
+  await postComments(analysisResults, postOptions);
+  
+  spinner.succeed(
+    `${chalk.green("✓")} Posted ${postedCount} comments to GitHub`,
+  );
+  
+  // Mark commits as processed in cache
+  if (options.cache !== false) {
+    for (const result of analysisResults) {
+      cacheManager.markCommitAsProcessed(result.commitSha);
+    }
+    cacheManager.save();
+  }
+  
+  console.log(chalk.green("\n✓ CommitStudio completed successfully!"));
 }

@@ -50,11 +50,11 @@ export function getCacheManager(options) {
 
   return {
     /**
-     * Check if a commit has already been processed
+     * Check if a commit has been processed
      * @param {string} commitSha - Commit SHA to check
-     * @returns {boolean} True if commit has been processed
+     * @returns {boolean} True if already processed
      */
-    isProcessed(commitSha) {
+    isProcessed: (commitSha) => {
       return cache.processedCommits.includes(commitSha);
     },
 
@@ -62,38 +62,50 @@ export function getCacheManager(options) {
      * Mark a commit as processed
      * @param {string} commitSha - Commit SHA to mark
      */
-    markAsProcessed(commitSha) {
+    markAsProcessed: (commitSha) => {
       if (!cache.processedCommits.includes(commitSha)) {
         cache.processedCommits.push(commitSha);
-        saveCache();
       }
     },
 
     /**
-     * Remove a commit from processed list
-     * @param {string} commitSha - Commit SHA to remove
+     * Check if a commit has been processed (alias for consistency)
+     * @param {string} commitSha - Commit SHA to check
+     * @returns {boolean} True if already processed
      */
-    unmarkAsProcessed(commitSha) {
-      cache.processedCommits = cache.processedCommits.filter(
-        (sha) => sha !== commitSha,
-      );
-      saveCache();
+    isCommitProcessed: (commitSha) => {
+      return cache.processedCommits.includes(commitSha);
     },
 
     /**
-     * Clear all processed commits from cache
+     * Mark a commit as processed (alias for consistency)
+     * @param {string} commitSha - Commit SHA to mark
      */
-    clearCache() {
-      cache.processedCommits = [];
-      saveCache();
+    markCommitAsProcessed: (commitSha) => {
+      if (!cache.processedCommits.includes(commitSha)) {
+        cache.processedCommits.push(commitSha);
+      }
     },
+
+    /**
+     * Save cache to disk
+     */
+    save: saveCache,
 
     /**
      * Get all processed commits
      * @returns {Array<string>} List of processed commit SHAs
      */
-    getProcessedCommits() {
+    getProcessedCommits: () => {
       return [...cache.processedCommits];
+    },
+
+    /**
+     * Reset cache (clear all processed commits)
+     */
+    reset: () => {
+      cache.processedCommits = [];
+      saveCache();
     },
   };
 }

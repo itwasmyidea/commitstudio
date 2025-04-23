@@ -103,7 +103,7 @@ async function promptForRemoteUrl(git) {
 export async function getRepositoryInfo(repoInfo) {
   try {
     const octokit = new Octokit({
-      auth: process.env.GITHUB_TOKEN,
+      auth: process.env.GITHUB_TOKEN || global.githubToken,
     });
 
     // Get repository details from GitHub API
@@ -121,12 +121,112 @@ export async function getRepositoryInfo(repoInfo) {
     };
   } catch (error) {
     if (error.status === 404) {
-      throw new Error(
-        `Repository ${repoInfo.owner}/${repoInfo.repo} not found. Check your GitHub token permissions.`,
-      );
+      console.log(chalk.yellow(`Repository ${repoInfo.owner}/${repoInfo.repo} not found.`));
+      return await promptForCorrectRepository(repoInfo.owner, repoInfo);
     }
 
     throw error;
+  }
+}
+
+/**
+ * Prompt the user for the correct repository when auto-detection fails
+ * @param {string} owner - Repository owner
+ * @param {Object} originalRepoInfo - Original repository information
+ * @returns {Promise<Object>} Corrected repository information
+ */
+async function promptForCorrectRepository(owner, originalRepoInfo) {
+  try {
+    const octokit = new Octokit({
+      auth: process.env.GITHUB_TOKEN || global.githubToken,
+    });
+
+    // Get list of repositories for the user
+    console.log(chalk.blue(`Fetching repositories for ${owner}...`));
+    const { data: repos } = await octokit.repos.listForUser({
+      username: owner,
+      per_page: 100,
+      sort: "updated"
+    });
+
+    if (repos.length === 0) {
+      return await promptForManualRepository(owner, originalRepoInfo);
+    }
+
+    // Ask user to select repository
+    const { selectedRepo } = await prompt({
+      type: 'select',
+      name: 'selectedRepo',
+      message: 'Select the correct repository:',
+      choices: [
+        ...repos.map(repo => ({ name: repo.name, value: repo.name })),
+        { name: 'Enter manually', value: 'manual' }
+      ]
+    });
+
+    if (selectedRepo === 'manual') {
+      return await promptForManualRepository(owner, originalRepoInfo);
+    }
+
+    // Get repository details
+    const { data } = await octokit.repos.get({
+      owner,
+      repo: selectedRepo
+    });
+
+    return {
+      ...originalRepoInfo,
+      repo: selectedRepo,
+      name: selectedRepo,
+      defaultBranch: data.default_branch,
+      isPrivate: data.private,
+      description: data.description,
+      apiUrl: data.url,
+    };
+  } catch (error) {
+    return await promptForManualRepository(owner, originalRepoInfo);
+  }
+}
+
+/**
+ * Prompt for manual repository entry
+ * @param {string} owner - Repository owner
+ * @param {Object} originalRepoInfo - Original repository information
+ * @returns {Promise<Object>} Corrected repository information
+ */
+async function promptForManualRepository(owner, originalRepoInfo) {
+  console.log(chalk.yellow("Please enter your repository information manually:"));
+
+  const { repoName } = await prompt({
+    type: 'input',
+    name: 'repoName',
+    message: 'Repository name:',
+    initial: originalRepoInfo.repo,
+    validate: value => value ? true : 'Repository name is required'
+  });
+
+  try {
+    const octokit = new Octokit({
+      auth: process.env.GITHUB_TOKEN || global.githubToken,
+    });
+
+    // Verify the repository exists
+    const { data } = await octokit.repos.get({
+      owner,
+      repo: repoName
+    });
+
+    return {
+      ...originalRepoInfo,
+      repo: repoName,
+      name: repoName,
+      defaultBranch: data.default_branch,
+      isPrivate: data.private,
+      description: data.description,
+      apiUrl: data.url,
+    };
+  } catch (error) {
+    throw new Error(`Repository ${owner}/${repoName} could not be accessed. Check that it exists and you have permission to access it.`);
   }
 }
 
