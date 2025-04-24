@@ -1,0 +1,206 @@
+---
+title: JavaScript API
+description: Guide to using CommitStudio programmatically through its JavaScript API
+---
+
+# JavaScript API
+
+CommitStudio can be used programmatically within your Node.js applications. This guide covers the JavaScript API for integrating CommitStudio into your own tools.
+
+## Installation
+
+First, add CommitStudio to your project:
+
+```bash
+npm install commitstudio
+```
+
+## Basic Usage
+
+```javascript
+import { run, runYolo } from 'commitstudio';
+
+// Standard analysis mode
+await run({
+  path: '/path/to/repo',
+  commits: 5,
+  branch: 'main',
+  dryRun: false
+});
+
+// YOLO mode for commit message rewriting
+await runYolo({
+  path: '/path/to/repo',
+  commits: 3,
+  emoji: true,
+  serious: false
+});
+```
+
+## API Reference
+
+### Standard Mode
+
+The `run()` function is the main entry point for standard analysis:
+
+```typescript
+interface RunOptions {
+  path?: string;            // Path to git repository (default: current directory)
+  commits?: number;         // Number of commits to analyze (default: all)
+  branch?: string;          // Branch to analyze (default: current branch)
+  since?: string;           // Analyze commits since date (e.g., "2023-01-01")
+  author?: string;          // Filter commits by author
+  useCache?: boolean;       // Whether to use cache (default: true)
+  dryRun?: boolean;         // Run without posting to GitHub (default: false)
+  verbose?: boolean;        // Show detailed logs (default: false)
+  openai?: {
+    model?: string;         // AI model to use
+    maxTokens?: number;     // Maximum tokens for API requests
+  };
+  onProgress?: (current: number, total: number) => void;  // Progress callback
+}
+
+function run(options: RunOptions): Promise<AnalysisResult[]>;
+```
+
+### YOLO Mode
+
+The `runYolo()` function is used for commit message rewriting:
+
+```typescript
+interface YoloOptions {
+  path?: string;            // Path to git repository (default: current directory)
+  commits?: number;         // Number of commits to analyze (default: 5)
+  branch?: string;          // Branch to analyze (default: current branch)
+  since?: string;           // Analyze commits since date
+  author?: string;          // Filter commits by author
+  emoji?: boolean;          // Add emoji to commit messages (default: true)
+  serious?: boolean;        // Generate professional messages without emojis
+  dryRun?: boolean;         // Preview without applying changes (default: false)
+  verbose?: boolean;        // Show detailed logs (default: false)
+  openai?: {
+    model?: string;         // AI model to use
+    maxTokens?: number;     // Maximum tokens for API requests
+  };
+}
+
+function runYolo(options: YoloOptions): Promise<YoloResult[]>;
+```
+
+### Configuration
+
+The `configureAI()` function manages AI settings:
+
+```typescript
+interface AIConfig {
+  model?: string;           // AI model name
+  maxTokens?: number;       // Maximum tokens for completion
+}
+
+function configureAI(config: AIConfig): Promise<void>;
+```
+
+### Authentication
+
+You can set credentials programmatically:
+
+```typescript
+function setGitHubToken(token: string): void;
+function setOpenAIKey(apiKey: string): void;
+```
+
+## Example: Custom Analysis Pipeline
+
+```javascript
+import { getCommits, analyzeDiffs, postComments } from 'commitstudio';
+
+async function customAnalysisPipeline() {
+  // Get commits
+  const commits = await getCommits({
+    path: './my-repo',
+    branch: 'feature/new-feature',
+    maxCount: 10
+  });
+  
+  // Analyze diffs
+  const results = await analyzeDiffs({
+    commits,
+    repoPath: './my-repo',
+    owner: 'username',
+    repo: 'repo-name',
+    onProgress: (current, total) => {
+      console.log(`Analyzing ${current}/${total}...`);
+    }
+  });
+  
+  // Custom filtering or processing
+  const filteredResults = results.filter(result => 
+    result.summary.includes('performance') || 
+    result.summary.includes('security')
+  );
+  
+  // Post comments
+  await postComments({
+    results: filteredResults,
+    owner: 'username',
+    repo: 'repo-name'
+  });
+  
+  return filteredResults;
+}
+```
+
+## Example: Extend with Custom AI Analysis
+
+```javascript
+import { getCommits, getCommitDiff, analyzeDiffs } from 'commitstudio';
+import { Configuration, OpenAIApi } from 'openai';
+
+async function customAIAnalysis() {
+  // Get commits
+  const commits = await getCommits({
+    path: './my-repo',
+    maxCount: 5
+  });
+  
+  // Configure custom OpenAI analysis
+  const configuration = new Configuration({
+    apiKey: process.env.OPENAI_API_KEY,
+  });
+  const openai = new OpenAIApi(configuration);
+  
+  // Analyze each commit with custom prompt
+  const results = [];
+  for (const commit of commits) {
+    const diff = await getCommitDiff(commit.sha, './my-repo');
+    
+    // Custom prompt focusing on security issues
+    const response = await openai.createChatCompletion({
+      model: "gpt-4.1-mini",
+      messages: [
+        {
+          role: "system",
+          content: "You are a security expert reviewing code changes. Focus exclusively on security vulnerabilities."
+        },
+        {
+          role: "user",
+          content: `Analyze this diff for security vulnerabilities:\n\n${diff}`
+        }
+      ],
+    });
+    
+    results.push({
+      commitSha: commit.sha,
+      securityAnalysis: response.data.choices[0].message.content
+    });
+  }
+  
+  return results;
+}
+```
+
+## Related Topics
+
+- [CLI Reference](/docs/5-api-reference/cli) - Command line interface documentation
+- [Output Format](/docs/5-api-reference/output-format) - Understanding CommitStudio output structure
+- [Custom AI Models](/docs/4-advanced/custom-ai-models) - Using different AI models 

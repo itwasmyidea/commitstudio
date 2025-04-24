@@ -1,0 +1,79 @@
+---
+title: Examples
+description: Common usage examples for CommitStudio
+---
+
+# Usage Examples
+
+Here are some common usage examples for CommitStudio.
+
+## Standard Mode Examples
+
+```bash
+# Analyze all commits in the current repository
+commitstudio
+
+# Analyze the last 5 commits
+commitstudio --commits 5
+
+# Analyze commits on a specific branch
+commitstudio --branch feature/new-feature
+
+# Analyze commits since a specific date
+commitstudio --since "2023-01-01"
+
+# Analyze commits by a specific author
+commitstudio --author "user@example.com"
+
+# Dry run (analyze but don't post comments)
+commitstudio --dry-run
+
+# Clear saved credentials
+commitstudio --reset
+```
+
+## YOLO Mode Examples
+
+```bash
+# Rewrite the last 5 commit messages with emojis
+commitstudio yolo
+
+# Rewrite the last 10 commit messages
+commitstudio yolo --commits 10
+
+# Rewrite commit messages without emojis
+commitstudio yolo --serious
+
+# Preview changes without applying them
+commitstudio yolo --dry-run
+```
+
+## GitHub Actions Integration Example
+
+Here's an example of using CommitStudio in a GitHub Actions workflow:
+
+```yaml
+name: CommitStudio Analysis
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v3
+        with:
+          node-version: "18"
+      - run: npm install -g commitstudio
+      - name: Run CommitStudio
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENAI_MODEL: gpt-4.1-mini
+        run: commitstudio --no-cache
+``` 

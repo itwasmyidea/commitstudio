@@ -1,0 +1,232 @@
+---
+title: YOLO Mode
+description: Master CommitStudio's YOLO mode for transforming cryptic commit messages into clear, professional documentation
+---
+
+## How YOLO Mode Works
+
+Behind the scenes, YOLO mode follows a sophisticated process:
+
+1. **Preparation**
+   - Verifies that your working tree is clean to avoid losing uncommitted changes
+   - Identifies the commits to process based on your filtering criteria
+   - Extracts the diff content for each commit
+
+2. **AI Analysis**
+   - For each commit, sends the code diff to the AI model
+   - Uses a specialized prompt that instructs the AI to:
+     - Analyze what changes were made
+     - Determine the purpose behind the changes
+     - Identify the key components affected
+     - Understand technical implications
+
+3. **Message Generation**
+   - Generates clear, descriptive commit messages
+   - Structures messages with:
+     - A concise but informative summary line
+     - Detailed body explaining the changes
+     - Rationale for the changes when context is available
+   - Optionally adds appropriate emojis based on the content type
+
+4. **Git History Rewriting**
+   - Uses Git's interactive rebase to modify commit messages
+   - Preserves all commit content and authorship information
+   - Maintains the same commit sequence and relationships
+
+5. **Results Presentation**
+   - Shows before/after comparison for each message
+   - Provides guidance on pushing updated history
+
+## Before & After Examples
+
+<div className="overflow-x-auto">
+<table className="w-full my-4">
+  <thead>
+    <tr>
+      <th>Before</th>
+      <th>After</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>fix bug</code></td>
+      <td><code>🐛 Fix authentication timeout issue in login</code></td>
+    </tr>
+    <tr>
+      <td><code>update UI</code></td>
+      <td><code>✨ Update user dashboard with responsive design</code></td>
+    </tr>
+    <tr>
+      <td><code>refactor</code></td>
+      <td><code>♻️ Refactor data pipeline for better performance</code></td>
+    </tr>
+    <tr>
+      <td><code>WIP</code></td>
+      <td><code>🚧 Implement user notification system</code></td>
+    </tr>
+    <tr>
+      <td><code>typo</code></td>
+      <td><code>📝 Fix typos in API documentation</code></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+## When to Use YOLO Mode
+
+YOLO mode is particularly valuable for:
+
+- **Legacy Projects**: Improving historical documentation
+- **Before Public Release**: Cleaning up commit history before open-sourcing
+- **Code Reviews**: Making the review process more efficient with better context
+- **Knowledge Transfer**: Helping new team members understand project history
+- **Documentation**: Creating better release notes from commit logs
+
+## Command Options in Detail
+
+```bash
+commitstudio yolo [options]
+```
+
+### Basic Options
+
+- `-p, --path <path>`: Path to the git repository (default: current directory)
+- `-c, --commits <number>`: Number of commits to analyze (default: last 5)
+- `-b, --branch <branch>`: Branch to analyze (default: current branch)
+
+### Filtering Options
+
+- `--since <date>`: Only analyze commits after this date (e.g., "2023-01-01")
+- `--author <email>`: Only analyze commits by this author
+- `--include-merge`: Include merge commits in the analysis (default: excluded)
+
+### Styling Options
+
+- `--emoji`: Add contextually appropriate emojis to commit messages (default: on)
+- `--serious`: Generate professional messages without emojis
+- `--prefix <text>`: Add a custom prefix to each commit message
+
+### Execution Options
+
+- `--dry-run`: Preview changes without modifying Git history
+- `--verbose`: Show detailed logs during processing
+- `--interactive`: Confirm each message change individually
+
+## How AI Generates Better Messages
+
+The AI analyzes several aspects of your commit to generate improved messages:
+
+1. **Code Diff Analysis**
+   - Identifies files modified, added, or deleted
+   - Examines specific code changes and patterns
+   - Recognizes language-specific constructs and features
+
+2. **Commit Type Detection**
+   - Feature additions
+   - Bug fixes
+   - Performance improvements
+   - Refactoring
+   - Documentation changes
+   - Test additions
+
+3. **Technical Context Inference**
+   - Component relationships
+   - Architectural patterns
+   - Common programming idioms
+   - Platform-specific considerations
+
+4. **Message Formatting Best Practices**
+   - Follows the 50/72 rule (50 char title, 72 char body lines)
+   - Uses imperative present tense
+   - Starts with a clear action verb
+   - Provides supporting details in the body
+
+## Detailed Examples
+
+### Basic Usage
+
+```bash
+# Rewrite the last 5 commit messages with emojis
+commitstudio yolo
+```
+
+Terminal output:
+```
+✓ Repository detected: username/project-name
+✓ Working tree is clean
+✓ Analyzing commits for rewriting...
+✓ Generating improved commit messages...
+
+1. Before: "fix login bug"
+   After:  "🐛 Fix user authentication timeout in login form"
+
+2. Before: "add feature"
+   After:  "✨ Add multi-factor authentication with email verification"
+
+3. Before: "cleanup"
+   After:  "♻️ Remove deprecated authentication methods and refactor auth flow"
+
+4. Before: "css updates"
+   After:  "💄 Update login form styling with responsive design and dark mode support"
+
+5. Before: "lint fix"
+   After:  "🧹 Fix ESLint warnings in authentication components"
+
+? Apply these changes to your commit history? (Y/n) y
+✓ Successfully rewrote commit messages!
+
+Remember: You'll need to force push these changes with:
+git push --force-with-lease
+```
+
+### Advanced Usage
+
+```bash
+# Rewrite messages since January 1st by a specific author, without emojis
+commitstudio yolo --since "2023-01-01" --author "dev@example.com" --serious --dry-run
+```
+
+## Important Cautions
+
+### Git History Rewriting Considerations
+
+YOLO mode uses `git rebase -i` to rewrite commit messages, which changes commit hashes. This means:
+
+1. **Clean Working Tree Required**: You must have a clean working tree (no uncommitted changes) before running YOLO mode. CommitStudio will check this and refuse to proceed if changes are detected.
+
+2. **Local-Only By Default**: Changes are applied to your local repository only. You must explicitly push them to share with others.
+
+3. **Force Push Required**: After running YOLO mode, you'll need to use `git push --force-with-lease` to update remote branches. Regular pushes will be rejected.
+
+4. **Collaboration Impact**: History rewriting can cause problems for collaborators who have based work on the original commits. Best practices:
+   - Only use on personal/feature branches
+   - Communicate with your team when using on shared branches
+   - Consider creating a backup branch before proceeding
+
+5. **CI/CD Considerations**: History rewrites may trigger new CI/CD runs for the same code
+
+## Integration with Development Workflow
+
+YOLO mode integrates best with these workflows:
+
+1. **Feature Branch Cleanup**:
+   - Develop on a feature branch
+   - Before creating a PR, run YOLO mode
+   - Force push the improved history
+   - Create a clean, professional PR
+
+2. **Personal Repository Management**:
+   - Run periodically on your repositories
+   - Creates a cleaner project history
+   - Makes release notes generation easier
+
+3. **Pre-Tag Cleanup**:
+   - Before creating version tags
+   - Ensures release history is professional
+   - Improves documentation for releases
+
+## Related Topics
+
+- [Standard Mode](/docs/2.usage/standard-mode) - Learn about CommitStudio's main analysis mode
+- [Configuration Options](/docs/3.configuration/options) - Customize AI models for better messages
+- [Git Workflows](/docs/4.advanced/github-actions) - Integrate CommitStudio into your workflow 

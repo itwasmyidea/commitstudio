@@ -138,7 +138,7 @@ commitstudio yolo [options]
 
 ## Managing Your Configuration
 
-CommitStudio securely saves your GitHub token and OpenAI API key to avoid asking for them each time you run the tool.
+CommitStudio securely saves your GitHub token and OpenAI API key to avoid asking for them each time you run the tool. 
 
 ### Saved Credentials Location
 
@@ -196,7 +196,7 @@ npm start
 # Or run with the flag directly
 node --no-deprecation ./bin/cli.js
 
-# For detailed diagnostics
+# For detailed diagnostics 
 npm run start:debug
 ```
 

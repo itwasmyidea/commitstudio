@@ -1,0 +1,8 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# Run code linting
+npm run lint-staged
+ 
+# Run documentation validation if docs files were modified
+git diff --cached --name-only | grep -q "docs/" && npm run docs:validate 

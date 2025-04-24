@@ -1,0 +1,42 @@
+---
+title: Configuration Mode
+description: Learn how to customize the AI settings for CommitStudio
+---
+
+```bash
+commitstudio config [options]
+```
+
+## Configuration Options
+
+- `--view`: View current configuration settings
+- `--model <model>`: Set AI model to use for analysis
+- `--max-tokens <number>`: Set maximum tokens for API requests
+
+## Examples
+
+```bash
+# View current configuration
+commitstudio config --view
+
+# Set a specific model
+commitstudio config --model gpt-4o
+
+# Set maximum tokens
+commitstudio config --max-tokens 3000
+
+# Update multiple settings at once
+commitstudio config --model gpt-4.1-mini --max-tokens 2500
+
+# Run interactive configuration
+commitstudio config
+```
+
+## Available Models
+
+CommitStudio supports these OpenAI models:
+
+- **gpt-4o**: Most powerful general model
+- **gpt-4.1**: High-performance model with latest capabilities  
+- **gpt-4.1-mini**: Balanced performance and cost
+- **gpt-4.1-nano**: Smaller, faster model 

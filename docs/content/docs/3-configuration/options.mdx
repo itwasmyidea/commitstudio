@@ -1,0 +1,206 @@
+---
+title: Configuration Options
+description: Comprehensive guide to configuring CommitStudio AI settings and options for optimal code analysis
+---
+
+## AI Models
+
+CommitStudio leverages OpenAI's latest models to provide intelligent code analysis. Each model offers different capabilities, performance characteristics, and cost profiles:
+
+<div className="overflow-x-auto">
+<table className="w-full my-4">
+  <thead>
+    <tr>
+      <th>Model</th>
+      <th>Best For</th>
+      <th>Token Limit</th>
+      <th>Cost</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>gpt-4o</strong></td>
+      <td>Complex codebases, nuanced reviews</td>
+      <td>128K</td>
+      <td>Highest</td>
+    </tr>
+    <tr>
+      <td><strong>gpt-4.1</strong></td>
+      <td>Deep technical analysis, security reviews</td>
+      <td>128K</td>
+      <td>High</td>
+    </tr>
+    <tr>
+      <td><strong>gpt-4.1-mini</strong></td>
+      <td>Everyday code reviews, general analysis</td>
+      <td>64K</td>
+      <td>Medium</td>
+    </tr>
+    <tr>
+      <td><strong>gpt-4.1-nano</strong></td>
+      <td>Quick reviews, simple analyses</td>
+      <td>16K</td>
+      <td>Low</td>
+    </tr>
+    <tr>
+      <td><strong>o4-mini</strong></td>
+      <td>Standard daily reviews</td>
+      <td>64K</td>
+      <td>Medium</td>
+    </tr>
+    <tr>
+      <td><strong>o3-mini</strong></td>
+      <td>Legacy projects, compatibility checks</td>
+      <td>16K</td>
+      <td>Low</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+The default model is **gpt-4.1-mini**, offering a good balance of performance and cost for most use cases. Here's how to select different models based on your needs:
+
+### Model Selection Guidelines
+
+- **For critical code reviews**: Use `gpt-4o` or `gpt-4.1` for the most thorough analysis
+- **For day-to-day development**: Use `gpt-4.1-mini` for good results at reasonable cost
+- **For quick checks**: Use `gpt-4.1-nano` when you need fast feedback
+- **For large repositories**: Use models with higher token limits to analyze more code at once
+
+## Token Limits
+
+Tokens are the basic units of text that the AI processes. Each model has different token limits that determine how much code can be analyzed at once:
+
+```bash
+# Set max tokens for responses
+commitstudio config --max-tokens 3000
+```
+
+### Understanding Token Usage
+
+- **Code Analysis**: More complex code requires more tokens to analyze
+- **Response Detail**: Higher token limits produce more detailed analysis
+- **Cost Impact**: Token usage directly affects API costs
+- **Context Window**: Separate from max tokens, this is the model's capacity to "see" code
+
+### Recommended Token Limits
+
+<div className="overflow-x-auto">
+<table className="w-full my-4">
+  <thead>
+    <tr>
+      <th>Use Case</th>
+      <th>Tokens</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Brief summaries</td>
+      <td>1000-1500</td>
+    </tr>
+    <tr>
+      <td>Standard reviews (default)</td>
+      <td>2000-3000</td>
+    </tr>
+    <tr>
+      <td>Detailed analysis</td>
+      <td>4000-6000</td>
+    </tr>
+    <tr>
+      <td>Comprehensive reviews</td>
+      <td>8000+</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+## How Model Selection Affects Analysis
+
+Different models analyze code differently:
+
+- **Higher-tier models** (gpt-4o, gpt-4.1)
+  - Recognize complex design patterns
+  - Identify subtle bugs that might only appear in edge cases
+  - Suggest architectural improvements
+  - Provide detailed explanations of potential issues
+  - Make more nuanced trade-off recommendations
+
+- **Mid-tier models** (gpt-4.1-mini, o4-mini)
+  - Catch common coding errors
+  - Identify straightforward performance issues
+  - Suggest code simplifications
+  - Recommend basic best practices
+  - Provide reasonable explanations
+
+- **Lower-tier models** (gpt-4.1-nano, o3-mini)
+  - Find syntax errors and obvious bugs
+  - Suggest simple improvements
+  - Provide brief explanations
+  - Work best on smaller, simpler code segments
+
+## Configuration Commands
+
+### View Current Settings
+
+To see your current configuration:
+
+```bash
+commitstudio config --view
+```
+
+This displays:
+- Current AI model
+- Maximum tokens setting
+- GitHub token status
+- OpenAI API key status
+- Cache configuration
+
+### Interactive Configuration
+
+For a guided setup experience:
+
+```bash
+commitstudio config
+```
+
+This launches an interactive prompt that:
+1. Shows available AI models
+2. Allows selection from a menu
+3. Prompts for token limit settings
+4. Validates your choices
+5. Saves your configuration
+
+### Direct Configuration
+
+For scripting or quick changes:
+
+```bash
+# Set a specific model
+commitstudio config --model gpt-4o
+
+# Set max tokens
+commitstudio config --max-tokens 3000
+
+# Configure multiple settings at once
+commitstudio config --model gpt-4.1-mini --max-tokens 2500
+```
+
+## Configuration Persistence
+
+Your configuration settings are stored securely on your machine:
+
+- **macOS**: `~/Library/Preferences/commitstudio-nodejs`
+- **Linux**: `~/.config/commitstudio`
+- **Windows**: `%APPDATA%\commitstudio-nodejs`
+
+These settings persist between sessions and can be reset with:
+
+```bash
+commitstudio --reset
+```
+
+## Related Topics
+
+- [Environment Variables](/docs/3-configuration/environment-variables) - Configure CommitStudio using environment variables
+- [Customizing Behavior](/docs/3-configuration/customizing-behavior) - Fine-tune how CommitStudio analyzes your code
+- [Standard Mode](/docs/2-usage/standard-mode) - See how configuration affects standard analysis mode 

@@ -1,0 +1,163 @@
+---
+title: Custom AI Models
+description: Configure and use different AI models to optimize CommitStudio for your specific needs
+---
+
+# Custom AI Models
+
+CommitStudio allows you to customize the AI models used for code analysis and commit message generation. This guide explains how to configure and use different models based on your specific needs.
+
+## Supported Models
+
+CommitStudio supports the following OpenAI models:
+
+| Model | Features | Ideal Use Cases | Token Context |
+|-------|----------|-----------------|---------------|
+| **gpt-4o** | - Most advanced capabilities<br>- Best reasoning<br>- Best code understanding | - Complex projects<br>- Security audits<br>- Architecture reviews | 128K |
+| **gpt-4.1** | - Advanced reasoning<br>- Excellent context handling<br>- Strong code analysis | - Detailed code reviews<br>- High-value projects<br>- Security analysis | 128K |
+| **gpt-4.1-mini** | - Good balance of performance and depth<br>- Fast responses<br>- Cost-effective | - Daily development<br>- Regular code reviews<br>- Most projects | 64K |
+| **gpt-4.1-nano** | - Very fast<br>- Lowest cost<br>- Basic analysis | - Quick feedback<br>- Simple code reviews<br>- Formatting checks | 16K |
+| **o4-mini** | - Same as gpt-4.1-mini<br>- Alternative naming | - Same as gpt-4.1-mini | 64K |
+| **o3-mini** | - Older model<br>- More conservative | - Legacy code bases<br>- Backward compatibility | 16K |
+
+## Setting the Model
+
+You can set your preferred model in several ways:
+
+### Using the Config Command
+
+The most straightforward way is to use the `config` command:
+
+```bash
+# Set model through the config command
+commitstudio config --model gpt-4o
+```
+
+### Through Environment Variables
+
+You can set the model via environment variables:
+
+```bash
+# Set in your shell or .env file
+export OPENAI_MODEL=gpt-4.1-mini
+```
+
+### In Command Options
+
+You can also specify the model directly when running a command:
+
+```javascript
+// In JavaScript
+import { run } from 'commitstudio';
+
+await run({
+  // Other options...
+  openai: {
+    model: 'gpt-4.1'
+  }
+});
+```
+
+## Model Selection Guidelines
+
+### By Project Type
+
+1. **Complex Projects**
+   - **Best choice**: gpt-4o
+   - **Why**: Offers the most advanced reasoning and code understanding
+
+2. **Regular Development**
+   - **Best choice**: gpt-4.1-mini
+   - **Why**: Good balance of performance, quality and cost
+
+3. **Quick Feedback**
+   - **Best choice**: gpt-4.1-nano
+   - **Why**: Fastest responses, suitable for simple reviews
+
+### By Budget Considerations
+
+1. **Performance Priority**
+   - **Best choice**: gpt-4o or gpt-4.1
+   - **Cost impact**: Highest, but delivers superior analysis
+
+2. **Balanced Approach**
+   - **Best choice**: gpt-4.1-mini
+   - **Cost impact**: Moderate, with good quality results
+
+3. **Cost-Sensitive**
+   - **Best choice**: gpt-4.1-nano
+   - **Cost impact**: Lowest, while still providing useful feedback
+
+## Token Limit Considerations
+
+Each model has a different token context limit, which affects how much code can be analyzed at once:
+
+```bash
+# Set maximum tokens for responses
+commitstudio config --max-tokens 3000
+```
+
+Recommended token settings:
+
+| Model | Recommended Max Tokens | Notes |
+|-------|------------------------|-------|
+| gpt-4o | 4000-8000 | Can handle more detailed analysis |
+| gpt-4.1 | 4000-8000 | Can process complex feedback |
+| gpt-4.1-mini | 2000-4000 | Good balance for most projects |
+| gpt-4.1-nano | 1000-2000 | Keep responses concise |
+
+## Example: Model Selection Strategy
+
+Consider adopting a tiered approach based on the nature of the code changes:
+
+1. **Security-Critical Changes**
+   ```bash
+   commitstudio --path ./security-module --model gpt-4o --max-tokens 6000
+   ```
+
+2. **Core Infrastructure Changes**
+   ```bash
+   commitstudio --path ./core-infra --model gpt-4.1 --max-tokens 4000
+   ```
+
+3. **Regular Feature Development**
+   ```bash
+   commitstudio --path ./features --model gpt-4.1-mini --max-tokens 3000
+   ```
+
+4. **Documentation and Simple Updates**
+   ```bash
+   commitstudio --path ./docs --model gpt-4.1-nano --max-tokens 2000
+   ```
+
+## Model-Specific Optimizations
+
+### GPT-4o and GPT-4.1
+
+These models excel at comprehensive analysis. Consider:
+
+- Using higher token limits (4000+)
+- Including more context in prompts
+- Leveraging their ability to identify subtle issues
+
+### GPT-4.1-mini
+
+This balanced model works well with:
+
+- Moderate token limits (2000-4000)
+- Focused analysis tasks
+- Regular development workflows
+
+### GPT-4.1-nano
+
+Optimize for speed with:
+
+- Lower token limits (1000-2000)
+- More specific prompts
+- Faster feedback cycles
+
+## Related Topics
+
+- [Configuration Options](/docs/3-configuration/options) - Explore all configuration settings
+- [CLI Reference](/docs/5-api-reference/cli) - Command line reference for model settings
+- [JavaScript API](/docs/5-api-reference/javascript-api) - Programmatic model configuration 
