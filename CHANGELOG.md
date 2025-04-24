@@ -2,6 +2,19 @@
 
 All notable changes to CommitStudio will be documented in this file.
 
+## [0.3.5] - 2025-04-23
+
+### Fixed
+
+- Fixed ESM compatibility issue with Enquirer import
+- Resolved module import errors when running in Node.js v22+ environments
+
+### Improved
+
+- Comprehensive documentation update with detailed AI model configuration options
+- Enhanced documentation for all commands and settings
+- Added detailed troubleshooting guidance for AI model-related issues
+
 ## [0.3.4] - 2025-04-23
 
 ### Added
