@@ -18,6 +18,9 @@
 - [Standard Mode](#standard-mode)
   - [Options](#standard-mode-options)
   - [Examples](#standard-mode-examples)
+- [Configuration Mode](#configuration-mode)
+  - [Options](#configuration-options)
+  - [Examples](#configuration-examples)
 - [YOLO Mode](#yolo-mode)
   - [YOLO Options](#yolo-mode-options)
   - [Examples](#yolo-mode-examples)
@@ -29,6 +32,7 @@
 - [Credentials Management](#credentials-management)
 - [Repository Detection](#repository-detection)
 - [Caching](#caching)
+- [AI Settings](#ai-settings)
 
 ## Advanced Usage
 
@@ -36,6 +40,7 @@
 - [Using with CI/CD](#using-with-cicd)
 - [Filtering Commits](#filtering-commits)
 - [Cache Management](#cache-management)
+- [Customizing AI Models](#customizing-ai-models)
 
 ## Troubleshooting
 
@@ -43,12 +48,14 @@
 - [Node.js Deprecation Warnings](#nodejs-deprecation-warnings)
 - [GitHub API Rate Limits](#github-api-rate-limits)
 - [Git Operation Errors](#git-operation-errors)
+- [AI Model Issues](#ai-model-issues)
 
 ## Reference
 
 - [Command Line Reference](#command-line-reference)
 - [API Reference](#api-reference)
 - [Configuration Options](#configuration-options)
+- [Supported AI Models](#supported-ai-models)
 
 ---
 
@@ -63,7 +70,7 @@ Additionally, it offers "YOLO mode" which can rewrite your commit messages to ma
 ## Key Features
 
 - **Auto-detect Repository**: Works with local git repositories, automatically connects to GitHub
-- **Smart Analysis**: Uses OpenAI's GPT-4.1-mini model to analyze git diffs and generate insightful comments
+- **Smart Analysis**: Uses OpenAI's GPT models to analyze git diffs and generate insightful comments
 - **GitHub Integration**: Seamlessly post comments to GitHub pull requests
 - **YOLO Mode**: Rewrite your commit messages with AI to be more descriptive and professional
 - **Caching**: Smart caching to avoid repeated analyses
@@ -71,6 +78,7 @@ Additionally, it offers "YOLO mode" which can rewrite your commit messages to ma
 - **Secure Credentials Management**: Securely handles GitHub and OpenAI API keys
 - **Parallel Processing**: Efficiently processes multiple commits at once
 - **Flexible Options**: Analyze specific commits, branches, or time periods
+- **Customizable AI Settings**: Choose your preferred AI model and adjust token limits
 
 ## How It Works
 
@@ -146,7 +154,10 @@ cd your-repository
 # Run CommitStudio in standard mode
 commitstudio
 
-# Or in YOLO mode to rewrite commit messages
+# Configure AI settings
+commitstudio config
+
+# Run in YOLO mode to rewrite commit messages
 commitstudio yolo
 ```
 
@@ -154,7 +165,7 @@ commitstudio yolo
 
 # Usage
 
-CommitStudio has two main modes of operation: Standard Mode and YOLO Mode.
+CommitStudio has three main modes of operation: Standard Mode, Configuration Mode, and YOLO Mode.
 
 ## Standard Mode
 
@@ -199,6 +210,39 @@ commitstudio --dry-run
 
 # Clear saved credentials
 commitstudio --reset
+```
+
+## Configuration Mode
+
+Configuration mode allows you to view and update CommitStudio settings, particularly AI-related settings like the model and token limits.
+
+```bash
+commitstudio config [options]
+```
+
+### Configuration Options
+
+- `--view`: View current configuration settings
+- `--model <model>`: Set AI model to use for analysis
+- `--max-tokens <number>`: Set maximum tokens for API requests
+
+### Configuration Examples
+
+```bash
+# View current configuration
+commitstudio config --view
+
+# Set a specific model
+commitstudio config --model gpt-4o
+
+# Set maximum tokens
+commitstudio config --max-tokens 3000
+
+# Update multiple settings at once
+commitstudio config --model gpt-4.1-mini --max-tokens 2500
+
+# Run interactive configuration
+commitstudio config
 ```
 
 ## YOLO Mode
@@ -257,12 +301,16 @@ CommitStudio supports the following environment variables:
 - `GITHUB_TOKEN`: Your GitHub personal access token
 - `OPENAI_API_KEY`: Your OpenAI API key
 - `GITHUB_CLIENT_ID`: (Optional) Client ID for GitHub OAuth App
+- `OPENAI_MODEL`: (Optional) AI model to use for analysis
+- `OPENAI_MAX_TOKENS`: (Optional) Maximum tokens for API requests
 
 Example:
 
 ```bash
 export GITHUB_TOKEN=your_github_token
 export OPENAI_API_KEY=your_openai_api_key
+export OPENAI_MODEL=gpt-4o
+export OPENAI_MAX_TOKENS=3000
 ```
 
 ## Credentials Management
@@ -302,6 +350,27 @@ CommitStudio caches processed commits to avoid analyzing and commenting on the s
 - **Cache Location**: Cache files are stored in `~/.commitstudio/cache/`
 - **Disable Caching**: Use the `--no-cache` flag to ignore the cache
 - **Cache Format**: One cache file per repository (`owner-repo.json`)
+
+## AI Settings
+
+CommitStudio allows you to customize the AI model and token settings:
+
+### Available Models
+
+- **gpt-4o**: Most powerful general model
+- **gpt-4.1**: High-performance model with latest capabilities
+- **gpt-4.1-mini**: Balanced performance and cost
+- **gpt-4.1-nano**: Smaller, faster model
+- **o4-mini**: Alternative name for the OpenAI mini variant
+- **o3-mini**: Older model version
+
+### Configuring AI Settings
+
+You can configure AI settings using:
+
+1. **Configuration Command**: `commitstudio config`
+2. **Environment Variables**: `OPENAI_MODEL` and `OPENAI_MAX_TOKENS`
+3. **Direct Parameters**: Pass `--model` and `--max-tokens` options to commands
 
 ---
 
@@ -351,6 +420,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENAI_MODEL: gpt-4.1-mini
         run: commitstudio --no-cache
 ```
 
@@ -372,6 +442,15 @@ Advanced cache management techniques:
 - **View Cache**: Cache files are stored as JSON and can be viewed manually
 - **Clear Cache**: Delete cache files to force reanalysis of all commits
 - **Selective Clearing**: Edit cache files to remove specific commit SHAs
+
+## Customizing AI Models
+
+Strategies for optimizing AI model usage:
+
+- **Cost Efficiency**: Use nano or mini models for routine analysis
+- **Detailed Analysis**: Use more powerful models for complex code
+- **Token Management**: Adjust max tokens based on commit size and complexity
+- **Model Selection**: Different models perform better on different languages/frameworks
 
 ---
 
@@ -428,6 +507,15 @@ Common git-related errors and solutions:
 - **Commit Access**: Ensure you have write access to the repository
 - **Force Push Issues**: Be cautious when force pushing after using YOLO mode
 
+## AI Model Issues
+
+Common AI-related issues and solutions:
+
+- **Token Limits**: If you're hitting token limits, try reducing max tokens or using a different model
+- **Model Availability**: Ensure the selected model is available on your OpenAI plan
+- **Rate Limits**: OpenAI has rate limits; spread out large analysis jobs
+- **Model Quality**: If analysis quality is poor, try upgrading to a more capable model
+
 ---
 
 # Reference
@@ -455,6 +543,14 @@ These options are available in both standard and YOLO modes:
 --reset                Clear all saved settings and credentials
 ```
 
+### Configuration Mode Options
+
+```
+--view                 View current configuration
+--model <model>        Set AI model to use for analysis
+--max-tokens <number>  Set maximum tokens for API requests
+```
+
 ### YOLO Mode Options
 
 ```
@@ -477,6 +573,10 @@ await run({
   commits: 10,
   branch: "main",
   dryRun: true,
+  openai: {
+    model: "gpt-4.1-mini",
+    maxTokens: 2000
+  }
 });
 
 // YOLO mode
@@ -484,6 +584,10 @@ await runYolo({
   path: "/path/to/repo",
   commits: 5,
   emoji: true,
+  openai: {
+    model: "gpt-4.1-mini",
+    maxTokens: 2000
+  }
 });
 ```
 
@@ -497,6 +601,21 @@ await runYolo({
 
 ### OpenAI Configuration
 
-- **Model**: Uses GPT-4.1-mini for analysis
-- **Temperature**: 0.3 for standard mode, 0.7 for YOLO mode
-- **Token Limits**: Handles truncation for large diffs
+- **Model**: Choose from gpt-4o, gpt-4.1, gpt-4.1-mini, gpt-4.1-nano, o4-mini, o3-mini
+- **Max Tokens**: Control the token limit for API requests
+- **Temperature**: 0.3 for standard mode, 0.6 for YOLO mode
+
+## Supported AI Models
+
+CommitStudio supports the following OpenAI models:
+
+| Model | Capabilities | Best For | Token Limit |
+|-------|--------------|----------|-------------|
+| gpt-4o | Most advanced general AI model | Complex, nuanced analysis | Highest |
+| gpt-4.1 | High performance, latest features | Deep technical analysis | High |
+| gpt-4.1-mini | Balance of performance and cost | Most analysis tasks | Medium |
+| gpt-4.1-nano | Efficient, faster processing | Simpler code reviews | Lower |
+| o4-mini | Alternative name for mini variant | Standard code review | Medium |
+| o3-mini | Older model | Legacy compatibility | Lower |
+
+The default model is gpt-4.1-mini, which offers a good balance of performance and cost.
