@@ -1,0 +1,72 @@
+---
+title: Customizing Behavior
+description: Learn how to customize CommitStudio's behavior
+---
+
+## Standard Mode Customization
+
+### Filtering Commits
+
+You can filter which commits are analyzed using these options:
+
+- **Number of Commits**: `--commits <number>` to limit to a specific number of recent commits
+  ```bash
+  commitstudio --commits 5
+  ```
+
+- **Branch Selection**: `--branch <branch-name>` to analyze a specific branch
+  ```bash
+  commitstudio --branch feature/new-feature
+  ```
+
+- **Date Filtering**: `--since <date>` to analyze commits after a specific date
+  ```bash
+  commitstudio --since "2023-01-01"
+  ```
+
+- **Author Filtering**: `--author <email>` to analyze commits from a specific author
+  ```bash
+  commitstudio --author "user@example.com"
+  ```
+
+### Dry Run Mode
+
+Use the `--dry-run` flag to run CommitStudio without posting comments to GitHub:
+
+```bash
+commitstudio --dry-run
+```
+
+This is useful for testing or to review the analysis locally before publishing comments.
+
+## YOLO Mode Customization
+
+### Emoji Settings
+
+- **Add emojis**: Use the `--emoji` flag (default) to add emojis to commit messages
+  ```bash
+  commitstudio yolo --emoji
+  ```
+
+- **Professional style**: Use the `--serious` flag for professional commit messages without emojis
+  ```bash
+  commitstudio yolo --serious
+  ```
+
+### Preview Mode
+
+Use the `--dry-run` flag to preview changes without applying them:
+
+```bash
+commitstudio yolo --dry-run
+```
+
+## Verbose Output
+
+For more detailed logging, use the `--verbose` flag:
+
+```bash
+commitstudio --verbose
+```
+
+This provides additional information about the analysis process, which can be helpful for troubleshooting. 

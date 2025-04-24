@@ -1,0 +1,141 @@
+---
+title: GitHub Actions Integration
+description: Learn how to integrate CommitStudio with GitHub Actions for automated code reviews
+---
+
+# GitHub Actions Integration
+
+CommitStudio can be easily integrated with GitHub Actions to automatically analyze pull requests and provide code review comments directly in GitHub.
+
+## Setting Up the GitHub Action
+
+Create a new GitHub Action workflow file in your repository at `.github/workflows/commitstudio.yml`:
+
+```yaml
+name: CommitStudio Code Review
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  code-review:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      
+      - name: Install CommitStudio
+        run: npm install -g commitstudio
+      
+      - name: Run CommitStudio Analysis
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: |
+          commitstudio --path . --branch ${{ github.head_ref }}
+```
+
+## Required Secrets
+
+Ensure you have the following secrets set in your GitHub repository:
+
+1. `OPENAI_API_KEY`: Your OpenAI API key to enable AI analysis
+
+The `GITHUB_TOKEN` is automatically provided by GitHub Actions and doesn't need to be manually configured.
+
+## Customizing the Workflow
+
+### Adjusting Model and Tokens
+
+You can adjust the AI model and token settings by adding environment variables:
+
+```yaml
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+  OPENAI_MODEL: gpt-4o
+  OPENAI_MAX_TOKENS: 4000
+```
+
+### Running on Specific Paths
+
+To run CommitStudio only when specific files are changed:
+
+```yaml
+on:
+  pull_request:
+    paths:
+      - '**.js'
+      - '**.ts'
+      - '**.jsx'
+      - '**.tsx'
+```
+
+### Adding Custom Options
+
+Additional command-line options can be added to customize behavior:
+
+```yaml
+run: |
+  commitstudio --path . --branch ${{ github.head_ref }} --no-cache --verbose
+```
+
+## Example: Commenting Only on Changed Files
+
+This example configures CommitStudio to only analyze and comment on files that were changed in the pull request:
+
+```yaml
+name: CommitStudio Code Review (Changed Files Only)
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  code-review:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      
+      - name: Install CommitStudio
+        run: npm install -g commitstudio
+      
+      - name: Get changed files
+        id: changed-files
+        uses: tj-actions/changed-files@v40
+        
+      - name: Run CommitStudio Analysis
+        if: steps.changed-files.outputs.any_changed == 'true'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENAI_MODEL: gpt-4.1-mini
+        run: |
+          commitstudio --path . --branch ${{ github.head_ref }} --files "${{ steps.changed-files.outputs.all_changed_files }}"
+```
+
+## Related Topics
+
+- [CI/CD Integration](/docs/4-advanced/ci-cd-integration) - Learn about broader CI/CD integration options
+- [Configuration Options](/docs/3-configuration/options) - See all available configuration options
+- [Custom AI Models](/docs/4-advanced/custom-ai-models) - Learn about custom AI model configurations 

@@ -167,3 +167,13 @@ All notable changes to CommitStudio will be documented in this file.
 ## [0.1.6] - 2025-04-22
 
 Initial public release
+
+## Release Process
+
+The release process for CommitStudio involves the following steps:
+
+1. **Code Review**: Ensure all changes are thoroughly reviewed by the development team.
+2. **Testing**: Run comprehensive tests to verify the stability and functionality of the new release.
+3. **Documentation**: Update the changelog and any relevant documentation.
+4. **Deployment**: Deploy the new release to the production environment.
+5. **Notification**: Notify users of the new release via email or in-app notifications.

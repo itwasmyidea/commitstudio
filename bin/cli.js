@@ -12,6 +12,15 @@ import { run } from "../src/index.js";
 import { runYolo } from "../src/yolo/index.js";
 import enquirer from "enquirer";
 import { AVAILABLE_AI_MODELS, DEFAULT_SETTINGS } from "../src/config/constants.js";
+import { fileURLToPath } from "url";
+import path from "path";
+import fs from "fs";
+
+// Get current package version
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const packageJson = JSON.parse(
+  fs.readFileSync(path.join(__dirname, "..", "package.json"), "utf8")
+);
 
 // Get prompt method from enquirer
 const { prompt } = enquirer;
@@ -29,7 +38,7 @@ program
   .description(
     "AI-powered tool that analyzes git diffs and posts comments to GitHub",
   )
-  .version("0.3.5")
+  .version(packageJson.version)
   .option(
     "-p, --path <path>",
     "Path to git repository (defaults to current directory)",
@@ -118,9 +127,9 @@ program
       
     } catch (error) {
       console.error(chalk.red("Configuration error:"), error.message);
-      process.exit(1);
-    }
-  });
+    process.exit(1);
+  }
+});
 
 // Add 'yolo' command to modify commit messages
 program

@@ -1,0 +1,161 @@
+---
+title: CLI Reference
+description: Complete reference for the CommitStudio command-line interface
+---
+
+# CLI Reference
+
+CommitStudio provides a comprehensive command-line interface (CLI) for analyzing git diffs and managing configurations.
+
+## Global Command
+
+The main `commitstudio` command has the following syntax:
+
+```bash
+commitstudio [options] [command]
+```
+
+### Global Options
+
+| Option | Description |
+|--------|-------------|
+| `-p, --path <path>` | Path to the git repository (default: current directory) |
+| `-c, --commits <number>` | Number of commits to analyze (default: all) |
+| `-b, --branch <branch>` | Branch to analyze (default: current branch) |
+| `--since <date>` | Analyze commits since date (e.g., "2023-01-01") |
+| `--author <email>` | Filter commits by author email |
+| `--no-cache` | Ignore cache and reanalyze all commits |
+| `--dry-run` | Run without posting comments to GitHub |
+| `--verbose` | Show detailed logs |
+| `--reset` | Clear all saved settings and credentials |
+| `-h, --help` | Display help information |
+
+## Commands
+
+CommitStudio provides several specialized commands:
+
+### Standard Mode (Default)
+
+Running `commitstudio` without a command will execute standard mode, which analyzes git diffs and posts comments to GitHub.
+
+```bash
+commitstudio [options]
+```
+
+Example:
+```bash
+# Analyze last 5 commits on the main branch
+commitstudio --commits 5 --branch main
+
+# Analyze commits since Jan 1st, 2023
+commitstudio --since "2023-01-01"
+
+# Analyze all commits by a specific author
+commitstudio --author "user@example.com"
+```
+
+### Configuration Mode
+
+The `config` command allows you to view and update CommitStudio settings.
+
+```bash
+commitstudio config [options]
+```
+
+Options:
+- `--view`: View current configuration settings
+- `--model <model>`: Set AI model to use for analysis (e.g., gpt-4o, gpt-4.1-mini)
+- `--max-tokens <number>`: Set maximum tokens for API requests
+
+Example:
+```bash
+# View current configuration
+commitstudio config --view
+
+# Set a specific model
+commitstudio config --model gpt-4o
+
+# Set maximum tokens
+commitstudio config --max-tokens 3000
+```
+
+### YOLO Mode
+
+The `yolo` command allows you to rewrite commit messages using AI.
+
+```bash
+commitstudio yolo [options]
+```
+
+Options:
+- Same options as the standard mode, plus:
+- `--emoji`: Add emoji to commit messages (default: true)
+- `--serious`: Generate professional messages without emojis
+- `--interactive`: Confirm each message change individually
+
+Example:
+```bash
+# Rewrite last 5 commit messages with emojis
+commitstudio yolo --commits 5
+
+# Rewrite commit messages without emojis
+commitstudio yolo --serious
+
+# Preview changes without applying them
+commitstudio yolo --dry-run
+```
+
+## Exit Codes
+
+CommitStudio uses the following exit codes:
+
+| Code | Meaning |
+|------|---------|
+| 0    | Success |
+| 1    | General error |
+| 2    | Command line parsing error |
+| 3    | Authentication error |
+| 4    | Repository detection error |
+| 5    | API error (OpenAI or GitHub) |
+
+## Environment Variables
+
+CommitStudio respects the following environment variables:
+
+| Variable | Description |
+|----------|-------------|
+| `GITHUB_TOKEN` | GitHub personal access token |
+| `OPENAI_API_KEY` | OpenAI API key |
+| `GITHUB_CLIENT_ID` | GitHub OAuth client ID (optional) |
+| `OPENAI_MODEL` | AI model to use for analysis |
+| `OPENAI_MAX_TOKENS` | Maximum tokens for API requests |
+
+## Advanced Usage
+
+### Custom Repository Path
+
+```bash
+commitstudio --path /path/to/your/repository
+```
+
+### Verbosity
+
+Use the `--verbose` flag to see detailed information about the execution process:
+
+```bash
+commitstudio --verbose
+```
+
+### Dry Run
+
+Use the `--dry-run` flag to analyze commits without posting comments to GitHub:
+
+```bash
+commitstudio --dry-run
+```
+
+## Related Topics
+
+- [JavaScript API](/docs/5-api-reference/javascript-api) - For programmatic usage
+- [Output Format](/docs/5-api-reference/output-format) - Understanding CommitStudio output
+- [Custom AI Models](/docs/4-advanced/custom-ai-models) - Learn about available AI models 

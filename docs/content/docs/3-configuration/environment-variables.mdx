@@ -1,0 +1,51 @@
+---
+title: Environment Variables
+description: Environment variables supported by CommitStudio
+---
+
+## Authentication Variables
+
+- `GITHUB_TOKEN`: Your GitHub personal access token
+- `OPENAI_API_KEY`: Your OpenAI API key
+- `GITHUB_CLIENT_ID`: (Optional) Client ID for GitHub OAuth App
+
+## Configuration Variables
+
+- `OPENAI_MODEL`: (Optional) AI model to use for analysis
+- `OPENAI_MAX_TOKENS`: (Optional) Maximum tokens for API requests
+
+## Example Usage
+
+You can set these environment variables in your shell before running CommitStudio:
+
+```bash
+export GITHUB_TOKEN=your_github_token
+export OPENAI_API_KEY=your_openai_api_key
+export OPENAI_MODEL=gpt-4o
+export OPENAI_MAX_TOKENS=3000
+```
+
+## In CI/CD Pipelines
+
+For CI/CD pipelines, you can set these secrets in your CI/CD platform:
+
+```yaml
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+  OPENAI_MODEL: gpt-4.1-mini
+```
+
+## Credentials Storage
+
+CommitStudio securely saves your GitHub token and OpenAI API key to avoid asking for them each time you run the tool. They are stored in:
+
+- **macOS**: `~/Library/Preferences/commitstudio-nodejs`
+- **Linux**: `~/.config/commitstudio`
+- **Windows**: `%APPDATA%\commitstudio-nodejs`
+
+To clear stored credentials, use the `--reset` flag:
+
+```bash
+commitstudio --reset
+``` 

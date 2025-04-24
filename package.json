@@ -22,7 +22,14 @@
     "pre-publish-check": "node ./scripts/pre-publish-check.js",
     "prepublishOnly": "npm run pre-publish-check && npm run test",
     "version": "npm run format && git add -A src",
-    "postversion": "git push && git push --tags"
+    "postversion": "git push && git push --tags",
+    "dev": "cd docs && npm run dev",
+    "docs:dev": "cd docs && npm run dev",
+    "docs:validate": "node ./scripts/validate-docs.js",
+    "docs:generate": "node ./scripts/generate-doc.js",
+    "docs:map": "node ./scripts/docs-map.js",
+    "docs:build": "cd docs && npm run build",
+    "docs:start": "cd docs && npm run start"
   },
   "keywords": [
     "git",
@@ -63,6 +70,8 @@
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-import": "^2.29.1",
     "eslint-plugin-node": "^11.1.0",
+    "glob": "^11.0.2",
+    "gray-matter": "^4.0.3",
     "husky": "^9.0.11",
     "lint-staged": "^15.2.0",
     "prettier": "^3.2.5",

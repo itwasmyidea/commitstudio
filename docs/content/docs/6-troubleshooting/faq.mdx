@@ -1,0 +1,56 @@
+---
+title: FAQ
+description: Frequently asked questions about CommitStudio
+---
+
+## General Questions
+
+### What is CommitStudio?
+CommitStudio is an AI-powered tool that analyzes git diffs and provides insightful code review comments. It can also rewrite commit messages to be more descriptive using its YOLO mode.
+
+### Is CommitStudio free to use?
+CommitStudio is available as an open-source tool, but it requires an OpenAI API key which has associated costs depending on usage.
+
+### Which AI models does CommitStudio support?
+CommitStudio supports several OpenAI models including gpt-4o, gpt-4.1, gpt-4.1-mini, gpt-4.1-nano, o4-mini, and o3-mini.
+
+## Usage Questions
+
+### Can I use CommitStudio in CI/CD pipelines?
+Yes, CommitStudio can be integrated into CI/CD pipelines to automate code reviews. You'll need to set up the appropriate environment variables for authentication.
+
+### Can CommitStudio work with private repositories?
+Yes, CommitStudio works with private repositories. You'll need to provide a GitHub token with 'repo' scope to access private repositories.
+
+### How do I limit which commits are analyzed?
+You can use the `--commits` option to limit the number of commits, `--branch` to specify a branch, `--since` to set a date, or `--author` to filter by author.
+
+## Technical Questions
+
+### How does caching work in CommitStudio?
+CommitStudio caches processed commits to avoid analyzing and commenting on the same commits multiple times. Cache files are stored in `~/.commitstudio/cache/`.
+
+### How secure is my code when using CommitStudio?
+Your code diffs are sent to OpenAI's API for analysis. OpenAI's data usage policies apply. GitHub tokens and OpenAI keys are stored locally on your machine in an encrypted format.
+
+### Can I customize the prompts used for AI analysis?
+The current version doesn't support customizing the prompts directly, but you can choose different AI models that affect the analysis style and depth.
+
+## Troubleshooting
+
+### Why am I seeing "API rate limit exceeded" errors?
+GitHub API has a limit of 5,000 requests per hour for authenticated users. Try reducing the number of commits you're analyzing or wait for the rate limit to reset.
+
+### How do I reset my saved credentials?
+Use the `--reset` flag to clear all saved settings and credentials:
+
+```bash
+commitstudio --reset
+```
+
+### The analysis isn't as detailed as I expected. What can I do?
+Try using a more powerful model like gpt-4o and increase the max tokens:
+
+```bash
+commitstudio config --model gpt-4o --max-tokens 4000
+``` 
