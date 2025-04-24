@@ -7,9 +7,11 @@
 
 import { Command } from "commander";
 import chalk from "chalk";
-import { loadConfig, clearConfig } from "../src/config/config.js";
+import { loadConfig, clearConfig, saveConfig, getConfig } from "../src/config/config.js";
 import { run } from "../src/index.js";
 import { runYolo } from "../src/yolo/index.js";
+import { prompt } from "enquirer";
+import { AVAILABLE_AI_MODELS, DEFAULT_SETTINGS } from "../src/config/constants.js";
 
 // Ensure unhandled errors don't crash the process without feedback
 process.on("unhandledRejection", (err) => {
@@ -24,7 +26,7 @@ program
   .description(
     "AI-powered tool that analyzes git diffs and posts comments to GitHub",
   )
-  .version("0.3.3")
+  .version("0.3.4")
   .option(
     "-p, --path <path>",
     "Path to git repository (defaults to current directory)",
@@ -69,6 +71,53 @@ program.action(async (options) => {
     process.exit(1);
   }
 });
+
+// Add 'config' command for AI model and token settings
+program
+  .command("config")
+  .description("View or update configuration settings")
+  .option("--view", "View current configuration")
+  .option("--model <model>", "Set AI model to use for analysis")
+  .option("--max-tokens <number>", "Set maximum tokens for API requests")
+  .action(async (options) => {
+    try {
+      // Load current configuration
+      await loadConfig();
+      
+      // If viewing config only
+      if (options.view) {
+        displayCurrentConfig();
+        return;
+      }
+      
+      // If model or max tokens specified directly in command
+      if (options.model || options.maxTokens) {
+        const config = {
+          openai: {}
+        };
+        
+        if (options.model) {
+          config.openai.model = options.model;
+        }
+        
+        if (options.maxTokens) {
+          config.openai.maxTokens = parseInt(options.maxTokens, 10);
+        }
+        
+        saveConfig(config);
+        console.log(chalk.green("✓ Configuration updated successfully."));
+        displayCurrentConfig();
+        return;
+      }
+      
+      // Interactive configuration
+      await configureInteractively();
+      
+    } catch (error) {
+      console.error(chalk.red("Configuration error:"), error.message);
+      process.exit(1);
+    }
+  });
 
 // Add 'yolo' command to modify commit messages
 program
@@ -118,5 +167,66 @@ program
       process.exit(1);
     }
   });
+
+/**
+ * Display current configuration
+ */
+function displayCurrentConfig() {
+  const config = getConfig();
+  
+  console.log(chalk.bold("\nCurrent Configuration:"));
+  console.log(chalk.cyan("AI Model:"), config.openai.model);
+  console.log(chalk.cyan("Max Tokens:"), config.openai.maxTokens);
+  console.log(chalk.cyan("Cache Enabled:"), config.cacheEnabled ? "Yes" : "No");
+  console.log(chalk.cyan("GitHub Token:"), config.github.token ? "Set" : "Not set");
+  console.log(chalk.cyan("OpenAI API Key:"), config.openai.apiKey ? "Set" : "Not set");
+  console.log("");
+}
+
+/**
+ * Interactive configuration
+ */
+async function configureInteractively() {
+  const config = getConfig();
+  
+  console.log(chalk.bold("\nConfigure CommitStudio AI Settings"));
+  
+  // Select AI model
+  const { model } = await prompt({
+    type: "select",
+    name: "model",
+    message: "Select the AI model to use for analysis:",
+    choices: AVAILABLE_AI_MODELS,
+    initial: AVAILABLE_AI_MODELS.indexOf(config.openai.model) !== -1 
+      ? AVAILABLE_AI_MODELS.indexOf(config.openai.model) 
+      : 2, // Default to gpt-4.1-mini if current model not in list
+  });
+  
+  // Set max tokens
+  const { maxTokens } = await prompt({
+    type: "input",
+    name: "maxTokens",
+    message: "Maximum tokens for API requests:",
+    initial: config.openai.maxTokens.toString(),
+    validate: (value) => {
+      const parsed = parseInt(value, 10);
+      if (isNaN(parsed) || parsed < 100) {
+        return "Please enter a number greater than or equal to 100";
+      }
+      return true;
+    },
+  });
+  
+  // Save the configuration
+  saveConfig({
+    openai: {
+      model,
+      maxTokens: parseInt(maxTokens, 10),
+    },
+  });
+  
+  console.log(chalk.green("\n✓ Configuration updated successfully."));
+  displayCurrentConfig();
+}
 
 program.parse(process.argv);

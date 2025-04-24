@@ -12,6 +12,7 @@ import { checkCommentExists } from "../github/comments.js";
  * @param {string} options.owner - Repository owner
  * @param {string} options.repo - Repository name
  * @param {Function} [options.onProgress] - Progress callback
+ * @param {Object} [options.config] - Configuration options
  * @returns {Promise<Array>} Analysis results
  */
 export async function analyzeDiffs({
@@ -20,6 +21,7 @@ export async function analyzeDiffs({
   owner,
   repo,
   onProgress,
+  config = {},
 }) {
   // Use global openaiApiKey if it exists, or check environment variable
   const apiKey = global.openaiApiKey || process.env.OPENAI_API_KEY;
@@ -48,7 +50,7 @@ export async function analyzeDiffs({
     const results = [];
 
     // Set up concurrency limit
-    const limit = pLimit(3); // Process up to 3 commits concurrently
+    const limit = pLimit(config.maxConcurrent || 3); // Process up to specified concurrent commits
 
     // First, check which commits already have comments
     const commitsThatNeedAnalysis = [];
@@ -81,6 +83,7 @@ export async function analyzeDiffs({
         const analysis = await analyzeWithOpenAI(openai, {
           diff,
           commit,
+          config,
         });
 
         // Add commit info to result
@@ -228,9 +231,10 @@ function generateMockAnalysis(diff, commit) {
  * @param {Object} options - Analysis options
  * @param {string} options.diff - Git diff content
  * @param {Object} options.commit - Commit metadata
+ * @param {Object} [options.config] - Configuration options
  * @returns {Promise<Object>} Analysis result
  */
-async function analyzeWithOpenAI(openai, { diff, commit }) {
+async function analyzeWithOpenAI(openai, { diff, commit, config = {} }) {
   // Create a system prompt that instructs the model on how to analyze code
   const systemPrompt = `You are a helpful programming assistant specializing in code review.
 You will be given a git diff from a commit along with the commit message.
@@ -257,7 +261,7 @@ If relevant, mention best practices and why they matter.`;
     }
 
     const response = await openai.chat.completions.create({
-      model: "gpt-4.1-mini", // Using GPT-4.1-mini for code analysis
+      model: config?.openai?.model || "gpt-4.1-mini", // Use configured model or default
       messages: [
         { role: "system", content: systemPrompt },
         {
@@ -266,7 +270,7 @@ If relevant, mention best practices and why they matter.`;
         },
       ],
       temperature: 0.3, // Lower temperature for more focused analysis
-      max_tokens: 2000,
+      max_tokens: config?.openai?.maxTokens || 2000, // Use configured max tokens or default
     });
 
     // Extract and parse the assistant's response

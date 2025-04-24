@@ -8,6 +8,16 @@
 export const GITHUB_CLIENT_ID =
   process.env.GITHUB_CLIENT_ID || "Ov23liIA45phTP52foql";
 
+// Available AI models
+export const AVAILABLE_AI_MODELS = [
+  "gpt-4o",
+  "gpt-4.1",
+  "gpt-4.1-mini",
+  "gpt-4.1-nano",
+  "o4-mini",
+  "o3-mini",
+];
+
 // Default settings
 export const DEFAULT_SETTINGS = {
   // Number of commits to analyze by default if not specified
@@ -30,7 +40,10 @@ export const DEFAULT_SETTINGS = {
   maxFileSize: 1024 * 1024,
 
   // OpenAI model to use for analysis
-  openaiModel: "gpt-4-turbo",
+  openaiModel: "gpt-4.1-mini",
+  
+  // Default max tokens for API requests
+  maxTokens: 2000,
 
   // Default prompt template for diff analysis
   defaultPromptTemplate:

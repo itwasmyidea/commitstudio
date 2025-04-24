@@ -218,6 +218,7 @@ async function modifyCommitMessages({
         oldMessage: commit.message,
         diff,
         useEmoji: options.emoji,
+        config: options,
       });
 
       results.push({
@@ -351,9 +352,13 @@ async function modifyCommitMessages({
  * Generate a new commit message for a commit
  * @param {Object} openai - OpenAI client
  * @param {Object} options - Options for generation
+ * @param {string} options.oldMessage - Original commit message
+ * @param {string} options.diff - Commit diff
+ * @param {boolean} options.useEmoji - Whether to include emoji
+ * @param {Object} [options.config] - Configuration options
  * @returns {Promise<string>} New commit message
  */
-async function generateCommitMessage(openai, { oldMessage, diff, useEmoji }) {
+async function generateCommitMessage(openai, { oldMessage, diff, useEmoji, config = {} }) {
   // Truncate very large diffs to prevent rate limit errors
   const MAX_DIFF_LENGTH = 15000;
   let truncatedDiff = diff;
@@ -375,7 +380,7 @@ Example formats:
 - "Add user profile settings page"`;
 
   const response = await openai.chat.completions.create({
-    model: "gpt-4.1-mini",
+    model: config?.openai?.model || "gpt-4.1-mini", // Use configured model or default
     messages: [
       { role: "system", content: systemPrompt },
       {
@@ -390,8 +395,8 @@ ${truncatedDiff}
 Write a better commit message that clearly explains what changes were made. ${useEmoji ? "Include an appropriate emoji at the start." : "Do not use emoji."}`,
       },
     ],
-    temperature: 0.7,
-    max_tokens: 100,
+    temperature: 0.6,
+    max_tokens: config?.openai?.maxTokens || 2000, // Use configured max tokens or default
   });
 
   let message = response.choices[0].message.content.trim();

@@ -2,6 +2,20 @@
 
 All notable changes to CommitStudio will be documented in this file.
 
+## [0.3.4] - 2025-04-23
+
+### Added
+
+- New configuration command (`commitstudio config`) to view and update settings
+- Added ability to customize AI model for analysis
+- Added ability to set custom max tokens for API requests
+- Supported models include: gpt-4o, gpt-4.1, gpt-4.1-mini, gpt-4.1-nano, o4-mini, o3-mini
+
+### Improved
+
+- Updated configuration persistence for AI settings
+- Configuration settings now apply to both standard and YOLO modes
+
 ## [0.3.3] - 2025-04-23
 
 ### Changed

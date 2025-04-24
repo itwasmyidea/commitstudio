@@ -12,14 +12,15 @@ CommitStudio provides code review comments on your commits with minimal human in
 ## Features
 
 - **Auto-detect Repository**: Works with local git repositories, automatically connects to GitHub
-- **Smart Analysis**: Uses OpenAI's GPT-4.1-mini model to analyze git diffs and generate insightful comments.
-- **GitHub Integration**: Seamlessly post comments to GitHub pull requests.
-- **YOLO Mode**: Rewrite your commit messages with AI to be more descriptive and professional.
-- **Caching**: Smart caching to avoid repeated analyses.
+- **Smart Analysis**: Uses OpenAI's GPT models to analyze git diffs and generate insightful comments
+- **GitHub Integration**: Seamlessly post comments to GitHub pull requests
+- **YOLO Mode**: Rewrite your commit messages with AI to be more descriptive and professional
+- **Caching**: Smart caching to avoid repeated analyses
 - **Interactive CLI**: Easy-to-use command line interface with helpful prompts
 - **Secure Credentials Management**: Securely handles GitHub and OpenAI API keys
 - **Parallel Processing**: Efficiently processes multiple commits at once
-- **Flexible Options**: Analyze specific commits, branches, or time periods.
+- **Flexible Options**: Analyze specific commits, branches, or time periods
+- **Customizable AI Settings**: Choose your preferred AI model and adjust token limits
 
 ## Installation
 
@@ -82,6 +83,39 @@ commitstudio [options]
 - `--verbose`: Show detailed logs
 - `--reset`: Clear all saved settings and credentials
 
+### Configuration Mode - AI Settings
+
+```bash
+commitstudio config [options]
+```
+
+#### Configuration Options
+
+- `--view`: View current configuration settings
+- `--model <model>`: Set AI model to use for analysis
+- `--max-tokens <number>`: Set maximum tokens for API requests
+
+Available models include: gpt-4o, gpt-4.1, gpt-4.1-mini, gpt-4.1-nano, o4-mini, o3-mini.
+
+#### Examples
+
+```bash
+# View current configuration
+commitstudio config --view
+
+# Set a specific model
+commitstudio config --model gpt-4o
+
+# Set max tokens
+commitstudio config --max-tokens 3000
+
+# Update multiple settings at once
+commitstudio config --model gpt-4.1-mini --max-tokens 2500
+
+# Run interactive configuration
+commitstudio config
+```
+
 ### YOLO Mode - Rewrite Commit Messages
 
 ```bash
@@ -104,11 +138,12 @@ commitstudio yolo [options]
 
 ## Managing Your Configuration
 
-CommitStudio securely saves your GitHub token and OpenAI API key to avoid asking for them each time you run the tool. 
+CommitStudio securely saves your GitHub token and OpenAI API key to avoid asking for them each time you run the tool.
 
 ### Saved Credentials Location
 
 Your credentials are securely stored in your user directory:
+
 - **macOS**: `~/Library/Preferences/commitstudio-nodejs`
 - **Linux**: `~/.config/commitstudio`
 - **Windows**: `%APPDATA%\commitstudio-nodejs`
@@ -161,7 +196,7 @@ npm start
 # Or run with the flag directly
 node --no-deprecation ./bin/cli.js
 
-# For detailed diagnostics 
+# For detailed diagnostics
 npm run start:debug
 ```
 

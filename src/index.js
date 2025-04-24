@@ -198,6 +198,7 @@ async function processRepository({
     owner,
     repo,
     onProgress,
+    config: options,
   });
 
   spinner.succeed();
