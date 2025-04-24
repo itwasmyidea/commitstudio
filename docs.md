@@ -1,17 +1,20 @@
 # CommitStudio Documentation
 
 ## Introduction
+
 - [Overview](#overview)
 - [Key Features](#key-features)
 - [How It Works](#how-it-works)
 
 ## Getting Started
+
 - [Installation](#installation)
 - [Prerequisites](#prerequisites)
 - [Authentication](#authentication)
 - [Quick Start](#quick-start)
 
 ## Usage
+
 - [Standard Mode](#standard-mode)
   - [Options](#standard-mode-options)
   - [Examples](#standard-mode-examples)
@@ -21,24 +24,28 @@
   - [Cautions & Requirements](#yolo-mode-cautions--requirements)
 
 ## Configuration
+
 - [Environment Variables](#environment-variables)
 - [Credentials Management](#credentials-management)
 - [Repository Detection](#repository-detection)
 - [Caching](#caching)
 
 ## Advanced Usage
+
 - [GitHub OAuth Configuration](#github-oauth-configuration)
 - [Using with CI/CD](#using-with-cicd)
 - [Filtering Commits](#filtering-commits)
 - [Cache Management](#cache-management)
 
 ## Troubleshooting
+
 - [Common Issues](#common-issues)
 - [Node.js Deprecation Warnings](#nodejs-deprecation-warnings)
 - [GitHub API Rate Limits](#github-api-rate-limits)
 - [Git Operation Errors](#git-operation-errors)
 
 ## Reference
+
 - [Command Line Reference](#command-line-reference)
 - [API Reference](#api-reference)
 - [Configuration Options](#configuration-options)
@@ -265,6 +272,7 @@ CommitStudio securely saves your GitHub token and OpenAI API key locally to avoi
 ### Saved Credentials Location
 
 Your credentials are securely stored in your user directory:
+
 - **macOS**: `~/Library/Preferences/commitstudio-nodejs`
 - **Linux**: `~/.config/commitstudio`
 - **Windows**: `%APPDATA%\commitstudio-nodejs`
@@ -337,7 +345,7 @@ jobs:
           fetch-depth: 0
       - uses: actions/setup-node@v3
         with:
-          node-version: '18'
+          node-version: "18"
       - run: npm install -g commitstudio
       - name: Run CommitStudio
         env:
@@ -400,7 +408,7 @@ npm start
 # Or run with the flag directly
 node --no-deprecation ./bin/cli.js
 
-# For detailed diagnostics 
+# For detailed diagnostics
 npm run start:debug
 ```
 
@@ -461,21 +469,21 @@ These options are available in both standard and YOLO modes:
 Although CommitStudio is primarily a CLI tool, its modules can be imported and used programmatically:
 
 ```javascript
-import { run, runYolo } from 'commitstudio';
+import { run, runYolo } from "commitstudio";
 
 // Standard mode
 await run({
-  path: '/path/to/repo',
+  path: "/path/to/repo",
   commits: 10,
-  branch: 'main',
-  dryRun: true
+  branch: "main",
+  dryRun: true,
 });
 
 // YOLO mode
 await runYolo({
-  path: '/path/to/repo',
+  path: "/path/to/repo",
   commits: 5,
-  emoji: true
+  emoji: true,
 });
 ```
 
@@ -491,4 +499,4 @@ await runYolo({
 
 - **Model**: Uses GPT-4.1-mini for analysis
 - **Temperature**: 0.3 for standard mode, 0.7 for YOLO mode
-- **Token Limits**: Handles truncation for large diffs 
+- **Token Limits**: Handles truncation for large diffs
