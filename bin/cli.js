@@ -10,8 +10,11 @@ import chalk from "chalk";
 import { loadConfig, clearConfig, saveConfig, getConfig } from "../src/config/config.js";
 import { run } from "../src/index.js";
 import { runYolo } from "../src/yolo/index.js";
-import { prompt } from "enquirer";
+import enquirer from "enquirer";
 import { AVAILABLE_AI_MODELS, DEFAULT_SETTINGS } from "../src/config/constants.js";
+
+// Get prompt method from enquirer
+const { prompt } = enquirer;
 
 // Ensure unhandled errors don't crash the process without feedback
 process.on("unhandledRejection", (err) => {
