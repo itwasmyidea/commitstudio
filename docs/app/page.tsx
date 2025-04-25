@@ -18,16 +18,18 @@ export default function Home() {
               <span className="text-xs text-muted-foreground ml-1 mt-1">v0.3.5</span>
             </Link>
           </div>
-          <nav className="flex items-center space-x-4">
+          <nav className="flex items-center space-x-3">
             <ThemeToggle />
             <Link
-              href="/docs/1-getting-started/introduction"
+              href="https://commitstud.io"
+              target="_blank"
+              rel="noreferrer"
               className={cn(
                 buttonVariants({ variant: "outline", size: "sm" }),
                 "transition-colors hover:text-primary"
               )}
             >
-              Documentation
+              Website
             </Link>
             <Link
               href={siteConfig.links.github}
@@ -92,12 +94,12 @@ export default function Home() {
               </p>
             </div>
             <div className="mx-auto grid justify-center gap-4 sm:grid-cols-2 md:grid-cols-3">
-              <Link href="/docs/2-usage/standard-mode" className="relative overflow-hidden rounded-lg border bg-background p-2 transition-colors hover:bg-muted">
+              <Link href="/docs/1-getting-started/quick-start" className="relative overflow-hidden rounded-lg border bg-background p-2 transition-colors hover:bg-muted">
                 <div className="flex h-[180px] flex-col justify-between rounded-md p-6">
                   <div className="space-y-2">
-                    <h3 className="font-bold">Code Quality</h3>
+                    <h3 className="font-bold">Quick Start</h3>
                     <p className="text-sm text-muted-foreground">
-                      Identify code quality issues and suggest improvements to make your code cleaner and more maintainable.
+                      Get up and running with CommitStudio in minutes with this straightforward guide.
                     </p>
                   </div>
                   <div className="text-sm text-muted-foreground/60 flex items-center">
@@ -108,9 +110,9 @@ export default function Home() {
               <Link href="/docs/2-usage/standard-mode" className="relative overflow-hidden rounded-lg border bg-background p-2 transition-colors hover:bg-muted">
                 <div className="flex h-[180px] flex-col justify-between rounded-md p-6">
                   <div className="space-y-2">
-                    <h3 className="font-bold">Bug Detection</h3>
+                    <h3 className="font-bold">Standard Mode</h3>
                     <p className="text-sm text-muted-foreground">
-                      Catch potential bugs and issues before they make it into production, reducing the likelihood of critical errors.
+                      Learn how to use CommitStudio's standard mode for thorough code reviews and analysis.
                     </p>
                   </div>
                   <div className="text-sm text-muted-foreground/60 flex items-center">
@@ -118,38 +120,12 @@ export default function Home() {
                   </div>
                 </div>
               </Link>
-              <Link href="/docs/5-api-reference/output-format" className="relative overflow-hidden rounded-lg border bg-background p-2 transition-colors hover:bg-muted">
+              <Link href="/docs/2-usage/yolo-mode" className="relative overflow-hidden rounded-lg border bg-background p-2 transition-colors hover:bg-muted">
                 <div className="flex h-[180px] flex-col justify-between rounded-md p-6">
                   <div className="space-y-2">
-                    <h3 className="font-bold">Pull Request Summaries</h3>
+                    <h3 className="font-bold">YOLO Mode</h3>
                     <p className="text-sm text-muted-foreground">
-                      Generate comprehensive summaries of pull requests, making it easier to understand changes at a glance.
-                    </p>
-                  </div>
-                  <div className="text-sm text-muted-foreground/60 flex items-center">
-                    <ArrowRight className="h-4 w-4 ml-auto" />
-                  </div>
-                </div>
-              </Link>
-              <Link href="/docs/4-advanced/ci-cd-integration" className="relative overflow-hidden rounded-lg border bg-background p-2 transition-colors hover:bg-muted">
-                <div className="flex h-[180px] flex-col justify-between rounded-md p-6">
-                  <div className="space-y-2">
-                    <h3 className="font-bold">CI/CD Integration</h3>
-                    <p className="text-sm text-muted-foreground">
-                      Seamlessly integrate with your CI/CD pipeline to automate code reviews as part of your development workflow.
-                    </p>
-                  </div>
-                  <div className="text-sm text-muted-foreground/60 flex items-center">
-                    <ArrowRight className="h-4 w-4 ml-auto" />
-                  </div>
-                </div>
-              </Link>
-              <Link href="/docs/4-advanced/github-actions" className="relative overflow-hidden rounded-lg border bg-background p-2 transition-colors hover:bg-muted">
-                <div className="flex h-[180px] flex-col justify-between rounded-md p-6">
-                  <div className="space-y-2">
-                    <h3 className="font-bold">GitHub Actions</h3>
-                    <p className="text-sm text-muted-foreground">
-                      Use CommitStudio with GitHub Actions to automate code reviews directly on your pull requests.
+                      Discover the faster, streamlined YOLO mode for quick feedback on your changes.
                     </p>
                   </div>
                   <div className="text-sm text-muted-foreground/60 flex items-center">
@@ -160,9 +136,35 @@ export default function Home() {
               <Link href="/docs/3-configuration/options" className="relative overflow-hidden rounded-lg border bg-background p-2 transition-colors hover:bg-muted">
                 <div className="flex h-[180px] flex-col justify-between rounded-md p-6">
                   <div className="space-y-2">
-                    <h3 className="font-bold">Custom Configuration</h3>
+                    <h3 className="font-bold">Configuration Options</h3>
                     <p className="text-sm text-muted-foreground">
-                      Configure and customize CommitStudio to match your team&apos;s coding standards and preferences.
+                      Customize CommitStudio with various configuration options to match your workflow.
+                    </p>
+                  </div>
+                  <div className="text-sm text-muted-foreground/60 flex items-center">
+                    <ArrowRight className="h-4 w-4 ml-auto" />
+                  </div>
+                </div>
+              </Link>
+              <Link href="/docs/6-troubleshooting/faq" className="relative overflow-hidden rounded-lg border bg-background p-2 transition-colors hover:bg-muted">
+                <div className="flex h-[180px] flex-col justify-between rounded-md p-6">
+                  <div className="space-y-2">
+                    <h3 className="font-bold">FAQ</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Find answers to frequently asked questions about CommitStudio.
+                    </p>
+                  </div>
+                  <div className="text-sm text-muted-foreground/60 flex items-center">
+                    <ArrowRight className="h-4 w-4 ml-auto" />
+                  </div>
+                </div>
+              </Link>
+              <Link href="/docs/6-troubleshooting/common-issues" className="relative overflow-hidden rounded-lg border bg-background p-2 transition-colors hover:bg-muted">
+                <div className="flex h-[180px] flex-col justify-between rounded-md p-6">
+                  <div className="space-y-2">
+                    <h3 className="font-bold">Common Issues</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Solutions to common problems and troubleshooting tips for CommitStudio.
                     </p>
                   </div>
                   <div className="text-sm text-muted-foreground/60 flex items-center">
@@ -196,6 +198,14 @@ export default function Home() {
             </p>
           </div>
           <div className="flex items-center">
+            <Link
+              href="https://commitstud.io"
+              target="_blank"
+              rel="noreferrer"
+              className="text-muted-foreground transition-colors hover:text-foreground mr-4"
+            >
+              Website
+            </Link>
             <Link
               href={siteConfig.links.github}
               target="_blank"
