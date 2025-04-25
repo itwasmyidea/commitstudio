@@ -37,6 +37,39 @@ const docsStructure = [
   { slug: "/docs/6-troubleshooting/faq", title: "FAQ" },
 ];
 
+// Reusable navigation card component
+interface NavCardProps {
+  title: string;
+  slug: string;
+  direction: "prev" | "next";
+}
+
+function NavCard({ title, slug, direction }: NavCardProps) {
+  const isPrev = direction === "prev";
+
+  return (
+    <Link
+      href={slug}
+      className="group flex-1 relative overflow-hidden rounded-lg   transition-all hover:border-primary/50"
+      title={`${isPrev ? "Previous" : "Next"}: ${title}`}
+    >
+      <div className="flex flex-col justify-between p-6">
+        <div className="space-y-0.5">
+          <div className={`flex opacity-50 items-center text-xs text-gray-600 ${!isPrev && "justify-end"} transition-opacity group-hover:opacity-100`}>
+            <span>{isPrev ? "Previous" : "Next"}</span>
+          </div>
+          <h3 className={`font-medium text-md relative ${!isPrev && "text-right"} transition-all group-hover:translate-x-2`}>
+            {isPrev && <ChevronLeft className="inline h-3 w-3 absolute -left-4 top-1.5 transition-transform group-hover:-translate-x-1" />}
+            {title}
+            {!isPrev && <ChevronRight className="inline h-3 w-3 absolute -right-4 top-1.5 transition-transform group-hover:translate-x-1" />}
+          </h3>
+        </div>
+       
+      </div>
+    </Link>
+  );
+}
+
 interface DocPaginationProps {
   slug: string;
 }
@@ -63,35 +96,15 @@ export function DocPagination({ slug }: DocPaginationProps) {
   if (!prevPage && !nextPage) return null;
   
   return (
-    <nav aria-label="Pagination Navigation" className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center space-y-4 sm:space-y-0 mt-12 pt-8 border-t">
+    <nav aria-label="Pagination Navigation" className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-4 mt-12 pt-8 border-t">
       {prevPage ? (
-        <Link
-          href={prevPage.slug}
-          className="group flex-1 sm:flex-initial relative inline-flex items-center border border-border px-4 py-3 sm:py-4 text-sm font-medium rounded-lg transition-colors duration-200 ease-in-out hover:bg-primary hover:text-primary-foreground hover:border-primary"
-          title={`Previous: ${prevPage.title}`}
-        >
-          <ChevronLeft className="h-4 w-4 mr-2 flex-shrink-0 transition-transform duration-200 group-hover:-translate-x-0.5" />
-          <div className="flex flex-col items-start">
-            <span className="text-xs text-muted-foreground font-normal uppercase tracking-wide">Previous</span>
-            <span className="font-medium">{prevPage.title}</span>
-          </div>
-        </Link>
+        <NavCard title={prevPage.title} slug={prevPage.slug} direction="prev" />
       ) : (
         <div className="flex-1 sm:flex-initial" /> // Empty div to maintain spacing
       )}
       
       {nextPage ? (
-        <Link
-          href={nextPage.slug}
-          className="group flex-1 sm:flex-initial relative inline-flex items-center border border-border px-4 py-3 sm:py-4 text-sm font-medium rounded-lg text-right transition-colors duration-200 ease-in-out hover:bg-primary hover:text-primary-foreground hover:border-primary"
-          title={`Next: ${nextPage.title}`}
-        >
-          <div className="flex flex-col items-end ml-auto">
-            <span className="text-xs text-muted-foreground font-normal uppercase tracking-wide">Next</span>
-            <span className="font-medium">{nextPage.title}</span>
-          </div>
-          <ChevronRight className="h-4 w-4 ml-2 flex-shrink-0 transition-transform duration-200 group-hover:translate-x-0.5" />
-        </Link>
+        <NavCard title={nextPage.title} slug={nextPage.slug} direction="next" />
       ) : (
         <div className="flex-1 sm:flex-initial" /> // Empty div to maintain spacing
       )}

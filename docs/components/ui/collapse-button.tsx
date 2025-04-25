@@ -20,10 +20,10 @@ export function CollapseButton({
   const [isOpen, setIsOpen] = useState(defaultOpen);
 
   return (
-    <div className={cn("space-y-1", className)}>
+    <div className={cn("space-y-1 ", className)}>
       <button
         type="button"
-        className="flex w-full items-center justify-between py-1 text-xs font-semibold uppercase text-muted-foreground tracking-wide hover:text-foreground"
+        className="flex w-full items-center justify-between py-1 text-sm font-semibold tracking-tighter text-muted-foreground hover:text-foreground"
         onClick={() => setIsOpen(!isOpen)}
       >
         <span>{title}</span>

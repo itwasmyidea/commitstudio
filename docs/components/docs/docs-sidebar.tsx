@@ -134,7 +134,7 @@ export function DocsSidebar({ className }: DocsSidebarProps) {
   usePathname();
 
   return (
-    <div className={cn("pb-4 pt-6", className)}>
+    <div className={cn("", className)}>
       <div className="space-y-6">
         <DocsSidebarNav items={items} />
       </div>
@@ -146,19 +146,19 @@ export function DocsSidebarNav({ items }: DocsSidebarNavProps) {
   const pathname = usePathname();
 
   return items.length ? (
-    <div className="flex flex-col space-y-6 px-3 py-3">
+    <div className="flex flex-col space-y-6 px-5 py-3 border-l pt-12">
       {items.map((item, index) => (
         <div key={index} className="space-y-3">
           <CollapseButton title={item.title}>
             {item.items?.length && (
-              <div className="flex flex-col space-y-2 mt-1">
+              <div className="flex flex-col space-y-2 mt-1 border-l ml-4">
                 {item.items.map((child, index) =>
                   child.href ? (
                     <Link
                       key={index}
                       href={child.href}
                       className={cn(
-                        "text-sm flex items-center",
+                        "text-xs flex items-center",
                         {
                           "font-medium text-blue-600 ml-4": pathname === child.href,
                           "text-muted-foreground hover:text-foreground ml-4": pathname !== child.href,
