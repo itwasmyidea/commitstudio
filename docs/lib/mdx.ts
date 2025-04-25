@@ -15,7 +15,7 @@ export interface Metadata {
   published?: boolean;
   featured?: boolean;
   toc?: boolean;
-  [key: string]: any;
+  [key: string]: string | number | boolean | undefined | Record<string, unknown>;
 }
 
 export interface Doc {

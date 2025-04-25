@@ -1,20 +1,28 @@
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { getDocFromSlug, processMDX } from "@/lib/mdx";
+import { getDocFromSlug } from "@/lib/mdx";
 import { getTableOfContents } from "@/lib/utils";
 import { DocPage } from "@/components/docs/doc-page";
 import { Mdx } from "@/components/mdx/mdx-components";
 
-interface DocPageProps {
-  params: {
-    slug: string[];
-  };
+// Define the parameter type
+interface Params {
+  slug: string[];
 }
 
-export async function generateMetadata(props: DocPageProps): Promise<Metadata> {
-  // Use props to access params in Next.js 15
-  const params = await Promise.resolve(props.params);
-  const slug = params?.slug || [];
+// Type for search params
+type SearchParams = Record<string, string | string[] | undefined>;
+
+// Interface following Next.js 15 requirements
+interface PageProps {
+  params: Promise<Params> | undefined;
+  searchParams: Promise<SearchParams> | undefined;
+}
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  // Ensure params is resolved
+  const resolvedParams = await (params || Promise.resolve({ slug: [] }));
+  const slug = resolvedParams?.slug || [];
   
   try {
     const doc = await getDocFromSlug(`docs/${slug.join("/")}`);
@@ -22,7 +30,7 @@ export async function generateMetadata(props: DocPageProps): Promise<Metadata> {
       title: doc.metadata.title,
       description: doc.metadata.description,
     };
-  } catch (error) {
+  } catch {
     return {
       title: "Not Found",
       description: "The page you are looking for does not exist.",
@@ -30,10 +38,10 @@ export async function generateMetadata(props: DocPageProps): Promise<Metadata> {
   }
 }
 
-export default async function Page(props: DocPageProps) {
-  // Use props to access params in Next.js 15
-  const params = await Promise.resolve(props.params);
-  const slug = params?.slug || [];
+export default async function Page({ params }: PageProps) {
+  // Ensure params is resolved
+  const resolvedParams = await (params || Promise.resolve({ slug: [] }));
+  const slug = resolvedParams?.slug || [];
   const fullSlug = `docs/${slug.join("/")}`;
   
   try {

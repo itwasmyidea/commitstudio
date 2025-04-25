@@ -162,7 +162,7 @@ export default function Home() {
                   <div className="space-y-2">
                     <h3 className="font-bold">Custom Configuration</h3>
                     <p className="text-sm text-muted-foreground">
-                      Configure and customize CommitStudio to match your team's coding standards and preferences.
+                      Configure and customize CommitStudio to match your team&apos;s coding standards and preferences.
                     </p>
                   </div>
                   <div className="text-sm text-muted-foreground/60 flex items-center">

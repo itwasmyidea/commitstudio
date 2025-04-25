@@ -3,7 +3,6 @@ import { Metadata } from "next";
 import { ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
-import { DocsSidebar } from "@/components/docs/docs-sidebar";
 
 export const metadata: Metadata = {
   title: "Documentation",
@@ -69,7 +68,7 @@ export default function DocsPage() {
             <div className="space-y-2">
               <h3 className="font-bold">Configuration</h3>
               <p className="text-sm text-muted-foreground">
-                Customize CommitStudio to fit your team's workflow and needs.
+                Customize CommitStudio to fit your team&apos;s workflow and needs.
               </p>
             </div>
             <Link

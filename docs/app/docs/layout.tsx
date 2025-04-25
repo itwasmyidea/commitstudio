@@ -1,10 +1,6 @@
 import { Metadata } from "next";
-import Link from "next/link";
 
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
 import { DocsSidebar } from "@/components/docs/docs-sidebar";
 import { DocsHeader } from "@/components/docs/docs-header";
 import { siteConfig } from "@/config/site";
