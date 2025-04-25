@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { MDXRemote } from "next-mdx-remote/rsc";
 import { cn, slugify } from "@/lib/utils";
+import React from "react";
 
 import { Callout } from "@/components/mdx/callout";
 import { CodeBlock } from "@/components/mdx/code-block";
@@ -11,6 +12,25 @@ function isTerminalCode(content: string, language?: string): boolean {
   if (language === 'bash' || language === 'sh' || language === 'shell') return true;
   if (content && (content.trim().startsWith('$') || content.trim().startsWith('#!'))) return true;
   return false;
+}
+
+// Define a type for MDX children with props
+interface CodeChildProps {
+  props: {
+    children: string;
+    className?: string;
+  };
+}
+
+// Helper to check if a child is a code element with props
+function isCodeChild(child: unknown): child is CodeChildProps {
+  return (
+    typeof child === 'object' &&
+    child !== null &&
+    'props' in child &&
+    typeof (child as Record<string, unknown>).props === 'object' &&
+    'children' in (child as { props: Record<string, unknown> }).props
+  );
 }
 
 const components = {
@@ -182,7 +202,7 @@ const components = {
     />
   ),
   // Simplified pre component that uses CodeBlock directly
-  pre: (props: any) => {
+  pre: (props: React.HTMLAttributes<HTMLPreElement> & { children?: React.ReactNode }) => {
     // Preserve the original className for styling
     const className = props.className || '';
     let language = '';
@@ -190,14 +210,14 @@ const components = {
     
     // Try to extract code content and language
     try {
-      // If props.children is a React element with code props
-      if (props.children?.props?.children && props.children?.props?.className) {
-        content = props.children.props.children;
+      const child = props.children;
+      if (isCodeChild(child)) {
+        content = child.props.children;
         // Extract language from className (e.g., "language-bash" -> "bash")
-        const match = props.children.props.className.match(/language-(\w+)/);
+        const match = child.props.className?.match(/language-(\w+)/);
         language = match ? match[1] : '';
       }
-    } catch (e) {
+    } catch {
       // If extraction fails, fall back to a regular pre
       return <pre {...props} className={cn("mb-4 mt-6 overflow-x-auto rounded-lg border p-4", className)} />;
     }
@@ -217,7 +237,7 @@ const components = {
     return <pre {...props} className={cn("mb-4 mt-6 overflow-x-auto rounded-lg border p-4", className)} />;
   },
   // Simplified code component
-  code: (props: any) => {
+  code: (props: React.HTMLAttributes<HTMLElement> & { className?: string }) => {
     // If within a pre (has language class), just return as is
     if (props.className?.includes('language-')) {
       return <code {...props} />;

@@ -2,11 +2,9 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ChevronRight } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
 import { CollapseButton } from "@/components/ui/collapse-button";
 
 interface DocsSidebarProps {
@@ -131,7 +129,9 @@ export function DocsSidebar({ className }: DocsSidebarProps) {
     },
   ];
 
-  const pathname = usePathname();
+  // Get the current pathname for potential use in styling
+  // We're not using it directly here but it's needed for consistency
+  usePathname();
 
   return (
     <div className={cn("pb-4 pt-6", className)}>

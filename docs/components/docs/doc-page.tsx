@@ -1,10 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import { ChevronRight, Clock } from "lucide-react";
 import { Metadata } from "@/lib/mdx";
 import { cn, formatDate } from "@/lib/utils";
-import { buttonVariants } from "@/components/ui/button";
 import { TableOfContents } from "@/components/docs/toc";
 import { MdxClientWrapper } from "@/components/mdx/mdx-client-wrapper";
 import { DocPagination } from "@/components/docs/doc-pagination";
