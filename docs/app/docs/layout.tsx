@@ -25,7 +25,7 @@ export default function DocsLayout({ children }: DocsLayoutProps) {
         <div className="grid grid-cols-1 gap-0 md:grid-cols-[180px_1fr] lg:grid-cols-[240px_1fr]">
           <aside className="fixed top-14 z-30 hidden h-[calc(100vh-3.5rem)] md:sticky md:block">
             <ScrollArea className="h-full">
-              <DocsSidebar alwaysExpandOnDesktop={true} />
+              <DocsSidebar />
             </ScrollArea>
           </aside>
           <main className="pl-6 py-6 overflow-x-hidden">
