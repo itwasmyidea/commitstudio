@@ -142,7 +142,7 @@ export function DocsSidebar({ className, inSheetView }: DocsSidebarProps) {
       <div className="space-y-2">
         <DocsSidebarNav 
           items={items} 
-          inSheetView={inSheetView} 
+          inSheetView={inSheetView}
         />
       </div>
     </div>

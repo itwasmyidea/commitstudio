@@ -28,7 +28,7 @@ export function DocPage({ mdxContent, metadata, slug, headings }: DocPageProps) 
   };
   
   return (
-    <main className="relative py-4 w-full overflow-x-hidden lg:py-6 min-h-[calc(100vh-4rem)]">
+    <main className="relative py-4 w-full overflow-x-hidden lg:py-6">
       <div className="lg:pr-[220px] relative max-w-7xl mx-auto">
         <div className="w-full min-w-0 pr-2 md:pr-4">
           <div className="mb-3 flex items-center space-x-1 text-sm text-muted-foreground">
@@ -64,7 +64,7 @@ export function DocPage({ mdxContent, metadata, slug, headings }: DocPageProps) 
         
         {metadata.toc !== false && headings.length > 0 && (
           <aside className="hidden lg:block">
-            <div className="sticky top-[4.5rem] pb-10 max-h-[calc(100vh-6rem)] overflow-y-auto">
+            <div className="fixed right-4 xl:right-8 top-[4.5rem] pb-10 max-h-[calc(100vh-6rem)] overflow-y-auto">
               <TableOfContents headings={headings} />
             </div>
           </aside>
