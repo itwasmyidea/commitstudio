@@ -10,11 +10,11 @@ export function HeroSection() {
     <section className="space-y-6 pb-8 pt-6 md:pb-12 md:pt-10 lg:py-16">
       <div className="container flex flex-col items-center gap-4 text-center">
         <Link
-          href={siteConfig.links.github}
+          href={siteConfig.links.npm}
           className="rounded-xl border border-border bg-border/50 text-primary/50 px-4 py-1 text-sm font-medium"
           target="_blank"
         >
-          0.3.5
+          v0.3.5
         </Link>
         <h1 className="font-medium text-3xl sm:text-5xl md:text-6xl lg:text-7xl">
           AI-powered Git Diff Analysis

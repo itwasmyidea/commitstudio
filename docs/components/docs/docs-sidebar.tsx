@@ -12,13 +12,11 @@ import { useMediaQuery } from "@/lib/hooks/use-media-query";
 interface DocsSidebarProps {
   className?: string;
   inSheetView?: boolean;
-  alwaysExpandOnDesktop?: boolean;
 }
 
 interface DocsSidebarNavProps {
   items: SidebarNavItem[];
   inSheetView?: boolean;
-  alwaysExpandOnDesktop?: boolean;
 }
 
 interface SidebarNavItem {
@@ -29,7 +27,7 @@ interface SidebarNavItem {
   disabled?: boolean;
 }
 
-export function DocsSidebar({ className, inSheetView, alwaysExpandOnDesktop = false }: DocsSidebarProps) {
+export function DocsSidebar({ className, inSheetView }: DocsSidebarProps) {
   const items: SidebarNavItem[] = [
     {
       title: "Getting Started",
@@ -145,29 +143,27 @@ export function DocsSidebar({ className, inSheetView, alwaysExpandOnDesktop = fa
         <DocsSidebarNav 
           items={items} 
           inSheetView={inSheetView} 
-          alwaysExpandOnDesktop={alwaysExpandOnDesktop} 
         />
       </div>
     </div>
   );
 }
 
-export function DocsSidebarNav({ items, inSheetView, alwaysExpandOnDesktop = false }: DocsSidebarNavProps) {
+export function DocsSidebarNav({ items, inSheetView }: DocsSidebarNavProps) {
   const pathname = usePathname();
   const isDesktop = useMediaQuery("(min-width: 768px)");
-  const forceExpand = alwaysExpandOnDesktop && isDesktop;
-
+  
   return items.length ? (
     <div className={cn(
       "flex flex-col space-y-2 px-3 py-3 md:py-6",
-      !inSheetView && "border-l border-r"
+      !inSheetView && "border-l border-r border-0"
     )}>
       {items.map((item, index) => (
         <div key={index} className="space-y-1">
           <CollapseButton 
             title={item.title} 
-            defaultOpen={pathname.includes(item.title.toLowerCase())}
-            alwaysOpen={forceExpand}
+            defaultOpen={isDesktop || pathname.includes(item.title.toLowerCase())}
+            alwaysOpen={false}
           >
             {item.items?.length && (
               <motion.div 
@@ -183,11 +179,11 @@ export function DocsSidebarNav({ items, inSheetView, alwaysExpandOnDesktop = fal
                       key={index}
                       href={child.href}
                       className={cn(
-                        "text-sm flex items-center py-1.5 px-3 rounded-md transition-colors",
+                        "text-xs flex items-center py-1 px-2 rounded-sm transition-colors",
                         inSheetView && "py-2",
                         pathname === child.href
-                          ? "text-primary font-medium bg-primary/5 ml-2"
-                          : "text-muted-foreground hover:text-foreground hover:bg-accent/40 ml-2",
+                          ? "text-primary blu ml-2"
+                          : "text-muted-foreground hover:text-foreground ml-2",
                       )}
                       target={child.disabled ? "_blank" : ""}
                       rel={child.disabled ? "noreferrer" : ""}

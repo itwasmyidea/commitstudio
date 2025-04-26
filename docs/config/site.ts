@@ -5,6 +5,7 @@ export const siteConfig = {
   ogImage: "https://commitstud.io/meta/og.jpg",
   links: {
     github: "https://github.com/itwasmyidea/commitstudio",
+    npm: "https://www.npmjs.com/package/commitstudio",
     devWebsite: "https://softx.ca",
     twitter: "https://twitter.com/gitcommitstudio",
     docs: "https://commitstud.io/docs",

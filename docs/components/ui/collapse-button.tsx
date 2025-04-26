@@ -35,13 +35,13 @@ export function CollapseButton({
     }
   }, [storeExpanded, title]);
   
-  // Set default open state for desktop (md and above)
+  // Set default open state for desktop (md and above) only on initial render
   useEffect(() => {
     if (isDesktop && storeExpanded === undefined) {
-      setSectionState(title, true);
-      setIsOpen(true);
+      setSectionState(title, defaultOpen);
+      setIsOpen(defaultOpen);
     }
-  }, [isDesktop, setSectionState, storeExpanded, title]);
+  }, [isDesktop, setSectionState, storeExpanded, title, defaultOpen]);
   
   const handleToggle = () => {
     if (!alwaysOpen) {
