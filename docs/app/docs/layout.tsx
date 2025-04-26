@@ -3,7 +3,7 @@ import { Metadata } from "next";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { DocsSidebar } from "@/components/docs/docs-sidebar";
 import { DocsHeader } from "@/components/docs/docs-header";
-import { siteConfig } from "@/config/site";
+import { SiteFooter } from "@/components/site-footer";
 
 export const metadata: Metadata = {
   title: {
@@ -21,45 +21,21 @@ export default function DocsLayout({ children }: DocsLayoutProps) {
   return (
     <div className="flex min-h-screen flex-col">
       <DocsHeader />
-      <div className="container flex-1">
-        <div className="grid grid-cols-1 gap-0 md:grid-cols-[250px_1fr] lg:grid-cols-[280px_1fr]">
-          <aside className="fixed top-14 z-30 hidden h-[calc(100vh-3.5rem)] md:sticky md:block border-r">
+      <div className="container flex-1 max-w-full md:px-2 lg:px-4 xl:container">
+        <div className="grid grid-cols-1 gap-0 md:grid-cols-[180px_1fr] lg:grid-cols-[240px_1fr]">
+          <aside className="fixed top-14 z-30 hidden h-[calc(100vh-3.5rem)] md:sticky md:block">
             <ScrollArea className="h-full">
-              <DocsSidebar />
+              <DocsSidebar alwaysExpandOnDesktop={true} />
             </ScrollArea>
           </aside>
-          <main className="pl-6 py-6">
+          <main className="pl-6 py-6 overflow-x-hidden">
             <div className="mx-auto w-full min-w-0">
               {children}
             </div>
           </main>
         </div>
       </div>
-      <footer className="border-t py-6 md:py-0">
-        <div className="container flex flex-col items-center gap-4 md:h-14 md:flex-row md:justify-between">
-          <p className="text-center text-sm leading-loose text-muted-foreground md:text-left">
-            Developed by{" "}
-            <a
-              href={siteConfig.links.devWebsite}
-              target="_blank"
-              rel="noreferrer"
-              className="font-medium underline underline-offset-4"
-            >
-              SofTx Innovations Inc
-            </a>
-            . Open Source & Available on{" "}
-            <a
-              href={siteConfig.links.github}
-              target="_blank"
-              rel="noreferrer"
-              className="font-medium underline underline-offset-4"
-            >
-              GitHub
-            </a>
-            .
-          </p>
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   );
 } 

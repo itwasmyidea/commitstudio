@@ -69,21 +69,21 @@ export function TableOfContents({ headings }: TocProps) {
   };
 
   return (
-    <div className="space-y-1 text-sm">
-      <p className="font-medium mb-2">On This Page</p>
-      <div className="flex flex-col space-y-1">
+    <div className="space-y-1 text-xs lg:text-sm max-h-[calc(100vh-4rem)] overflow-y-auto py-6 pr-4">
+      <p className="font-medium mb-1 lg:mb-2">On This Page</p>
+      <div className="flex flex-col space-y-0.5 lg:space-y-1">
         {items.map((item, index) => (
           <a
             key={index}
             href={`#${item.hash}`}
             onClick={(e) => handleAnchorClick(e, item.hash)}
             className={cn(
-              "line-clamp-2 hover:underline transition-colors py-1",
+              "line-clamp-2 hover:underline transition-colors py-0.5 lg:py-1 rounded hover:bg-accent/40 px-1",
               item.level === 2 
                 ? "font-medium" 
-                : "pl-3 text-xs",
+                : "pl-2 lg:pl-3 text-[10px] lg:text-xs",
               activeId === item.hash 
-                ? "text-blue-500 font-medium" 
+                ? "text-blue-500 font-medium bg-accent/30" 
                 : "text-muted-foreground"
             )}
           >

@@ -194,3 +194,50 @@
 .mdx pre {
   position: relative;
 }
+
+/* Fix for tables and code blocks overflowing */
+.mdx-processor {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.mdx-processor pre {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.mdx-processor table {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  border-collapse: collapse;
+}
+
+.mdx-processor img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Improve table styles */
+.mdx-processor table th,
+.mdx-processor table td {
+  padding: 0.5rem;
+  border: 1px solid var(--border);
+}
+
+/* Fix horizontal scrolling on tablet screens */
+@media (min-width: 700px) and (max-width: 999px) {
+  .container {
+    max-width: 100%;
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  
+  main {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+}

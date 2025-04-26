@@ -19,7 +19,7 @@ export function DocPage({ mdxContent, metadata, slug, headings }: DocPageProps) 
   const processMdxContent = () => {
     // Return the MDX content in a wrapper
     return (
-      <div className="mdx-processor">
+      <div className="mdx-processor max-w-full overflow-hidden">
         <MdxClientWrapper skipFirstHeading={true}>
           {mdxContent}
         </MdxClientWrapper>
@@ -28,8 +28,8 @@ export function DocPage({ mdxContent, metadata, slug, headings }: DocPageProps) 
   };
   
   return (
-    <main className="relative py-4 lg:grid lg:grid-cols-[1fr_240px] lg:gap-8 lg:py-6">
-      <div className="mx-auto w-full min-w-0">
+    <main className="relative py-4 w-full overflow-x-hidden lg:grid lg:grid-cols-[1fr_200px] xl:grid-cols-[1fr_220px] lg:gap-4 xl:gap-8 lg:py-6">
+      <div className="mx-auto w-full min-w-0 pr-2 md:pr-4">
         <div className="mb-3 flex items-center space-x-1 text-sm text-muted-foreground">
           <div className="overflow-hidden text-ellipsis whitespace-nowrap">
             Docs
@@ -51,7 +51,7 @@ export function DocPage({ mdxContent, metadata, slug, headings }: DocPageProps) 
             </div>
           )}
         </div>
-        <div className="pb-8 pt-6">
+        <div className="pb-8 pt-6 overflow-x-auto">
           {processMdxContent()}
         </div>
         
@@ -61,11 +61,11 @@ export function DocPage({ mdxContent, metadata, slug, headings }: DocPageProps) 
         </div>
       </div>
       {metadata.toc !== false && headings.length > 0 && (
-        <div className="hidden text-sm lg:block">
-          <div className="sticky top-16 -mt-6 max-h-[calc(var(--vh)-4rem)] overflow-y-auto pt-6">
+        <aside className="hidden lg:block lg:sticky self-start top-14 h-fit">
+          <div className="pt-6">
             <TableOfContents headings={headings} />
           </div>
-        </div>
+        </aside>
       )}
     </main>
   );

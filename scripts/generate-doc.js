@@ -60,9 +60,9 @@ commitstudio --help
 
 ## Next Steps
 
-- [Configuration Options](/docs/3.configuration/options)
-- [Standard Mode](/docs/2.usage/standard-mode)
-- [Examples](/docs/2.usage/examples)
+- [Configuration Options](/docs/3-configuration/options)
+- [Standard Mode](/docs/2-usage/standard-mode)
+- [Examples](/docs/2-usage/examples)
 `,
 
   // Usage template
@@ -101,7 +101,7 @@ commitstudio --another-flag
 
 ## Related Topics
 
-- [Configuration Options](/docs/3.configuration/options)
+- [Configuration Options](/docs/3-configuration/options)
 - [Troubleshooting](/docs/6.troubleshooting/common-issues)
 `,
 
@@ -134,8 +134,8 @@ commitstudio config --set-option value
 
 ## Related Settings
 
-- [Related Topic 1](/docs/3.configuration/options)
-- [Related Topic 2](/docs/2.usage/standard-mode)
+- [Related Topic 1](/docs/3-configuration/options)
+- [Related Topic 2](/docs/2-usage/standard-mode)
 `,
 
   // Default template for other categories
@@ -164,7 +164,7 @@ commitstudio --example-flag
 ## Related Topics
 
 - [Getting Started](/docs/1.getting-started/introduction)
-- [Configuration](/docs/3.configuration/options)
+- [Configuration](/docs/3-configuration/options)
 `,
 };
 

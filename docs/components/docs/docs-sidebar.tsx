@@ -2,17 +2,23 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { motion } from "framer-motion";
 
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { CollapseButton } from "@/components/ui/collapse-button";
+import { useMediaQuery } from "@/lib/hooks/use-media-query";
 
 interface DocsSidebarProps {
   className?: string;
+  inSheetView?: boolean;
+  alwaysExpandOnDesktop?: boolean;
 }
 
 interface DocsSidebarNavProps {
   items: SidebarNavItem[];
+  inSheetView?: boolean;
+  alwaysExpandOnDesktop?: boolean;
 }
 
 interface SidebarNavItem {
@@ -23,7 +29,7 @@ interface SidebarNavItem {
   disabled?: boolean;
 }
 
-export function DocsSidebar({ className }: DocsSidebarProps) {
+export function DocsSidebar({ className, inSheetView, alwaysExpandOnDesktop = false }: DocsSidebarProps) {
   const items: SidebarNavItem[] = [
     {
       title: "Getting Started",
@@ -129,40 +135,59 @@ export function DocsSidebar({ className }: DocsSidebarProps) {
     },
   ];
 
-  // Get the current pathname for potential use in styling
-  // We're not using it directly here but it's needed for consistency
-  usePathname();
-
   return (
-    <div className={cn("", className)}>
-      <div className="space-y-6">
-        <DocsSidebarNav items={items} />
+    <div className={cn(
+      "py-2 sm:py-4", 
+      inSheetView && "h-[calc(100vh-4rem)] overflow-y-auto pb-20",
+      className
+    )}>
+      <div className="space-y-2">
+        <DocsSidebarNav 
+          items={items} 
+          inSheetView={inSheetView} 
+          alwaysExpandOnDesktop={alwaysExpandOnDesktop} 
+        />
       </div>
     </div>
   );
 }
 
-export function DocsSidebarNav({ items }: DocsSidebarNavProps) {
+export function DocsSidebarNav({ items, inSheetView, alwaysExpandOnDesktop = false }: DocsSidebarNavProps) {
   const pathname = usePathname();
+  const isDesktop = useMediaQuery("(min-width: 768px)");
+  const forceExpand = alwaysExpandOnDesktop && isDesktop;
 
   return items.length ? (
-    <div className="flex flex-col space-y-6 px-5 py-3 border-l pt-12">
+    <div className={cn(
+      "flex flex-col space-y-2 px-3 py-3 md:py-6",
+      !inSheetView && "border-l border-r"
+    )}>
       {items.map((item, index) => (
-        <div key={index} className="space-y-3">
-          <CollapseButton title={item.title}>
+        <div key={index} className="space-y-1">
+          <CollapseButton 
+            title={item.title} 
+            defaultOpen={pathname.includes(item.title.toLowerCase())}
+            alwaysOpen={forceExpand}
+          >
             {item.items?.length && (
-              <div className="flex flex-col space-y-2 mt-1 border-l ml-4">
+              <motion.div 
+                className="flex flex-col space-y-1 mt-1 border-l ml-2"
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.3 }}
+              >
                 {item.items.map((child, index) =>
                   child.href ? (
                     <Link
                       key={index}
                       href={child.href}
                       className={cn(
-                        "text-xs flex items-center",
-                        {
-                          "font-medium text-blue-600 ml-4": pathname === child.href,
-                          "text-muted-foreground hover:text-foreground ml-4": pathname !== child.href,
-                        }
+                        "text-sm flex items-center py-1.5 px-3 rounded-md transition-colors",
+                        inSheetView && "py-2",
+                        pathname === child.href
+                          ? "text-primary font-medium bg-primary/5 ml-2"
+                          : "text-muted-foreground hover:text-foreground hover:bg-accent/40 ml-2",
                       )}
                       target={child.disabled ? "_blank" : ""}
                       rel={child.disabled ? "noreferrer" : ""}
@@ -177,7 +202,10 @@ export function DocsSidebarNav({ items }: DocsSidebarNavProps) {
                   ) : (
                     <span
                       key={index}
-                      className="flex text-sm px-1 py-1 ml-4 text-muted-foreground/50 cursor-not-allowed"
+                      className={cn(
+                        "flex text-xs px-3 py-1.5 ml-2 text-muted-foreground/50 cursor-not-allowed",
+                        inSheetView && "py-2"
+                      )}
                     >
                       {child.title}
                       {child.label && (
@@ -188,7 +216,7 @@ export function DocsSidebarNav({ items }: DocsSidebarNavProps) {
                     </span>
                   )
                 )}
-              </div>
+              </motion.div>
             )}
           </CollapseButton>
         </div>

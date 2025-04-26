@@ -50,7 +50,7 @@ function NavCard({ title, slug, direction }: NavCardProps) {
   return (
     <Link
       href={slug}
-      className="group flex-1 relative overflow-hidden rounded-lg   transition-all hover:border-primary/50"
+      className="group flex-1 relative overflow-hidden rounded-md bg-border/20 transition-all border border-border/0 hover:border-border"
       title={`${isPrev ? "Previous" : "Next"}: ${title}`}
     >
       <div className="flex flex-col justify-between p-6">
@@ -58,13 +58,12 @@ function NavCard({ title, slug, direction }: NavCardProps) {
           <div className={`flex opacity-50 items-center text-xs text-gray-600 ${!isPrev && "justify-end"} transition-opacity group-hover:opacity-100`}>
             <span>{isPrev ? "Previous" : "Next"}</span>
           </div>
-          <h3 className={`font-medium text-md relative ${!isPrev && "text-right"} transition-all group-hover:translate-x-2`}>
-            {isPrev && <ChevronLeft className="inline h-3 w-3 absolute -left-4 top-1.5 transition-transform group-hover:-translate-x-1" />}
+          <h3 className={`font-medium text-md relative ${!isPrev && "text-right"}`}>
+            {isPrev && <ChevronLeft className="inline h-3 w-3 mr-1" />}
             {title}
-            {!isPrev && <ChevronRight className="inline h-3 w-3 absolute -right-4 top-1.5 transition-transform group-hover:translate-x-1" />}
+            {!isPrev && <ChevronRight className="inline h-3 w-3 ml-1" />}
           </h3>
         </div>
-       
       </div>
     </Link>
   );
@@ -75,38 +74,53 @@ interface DocPaginationProps {
 }
 
 export function DocPagination({ slug }: DocPaginationProps) {
-  // Add leading slash if missing
-  const fullSlug = slug.startsWith('/') ? slug : `/${slug}`;
+  // Get current path without domain
+  let normalizedSlug = slug;
   
-  // Find current page index in the document structure
-  let currentIndex = docsStructure.findIndex(doc => doc.slug === fullSlug);
-  
-  // If not found with exact match, try simple path comparison
-  if (currentIndex === -1) {
-    currentIndex = docsStructure.findIndex(doc => 
-      doc.slug.endsWith(fullSlug.split('/').pop() || '')
-    );
+  // Add /docs/ prefix if missing
+  if (!normalizedSlug.startsWith('/docs/')) {
+    normalizedSlug = `/docs/${normalizedSlug}`;
   }
   
-  // Get previous and next pages
+  // Strip trailing slash if present
+  if (normalizedSlug.endsWith('/')) {
+    normalizedSlug = normalizedSlug.slice(0, -1);
+  }
+  
+  // Find the index of the current page in our structure
+  const currentIndex = docsStructure.findIndex(
+    (item) => item.slug === normalizedSlug
+  );
+  
+  // If page not found in structure, don't show navigation
+  if (currentIndex === -1) {
+    return null;
+  }
+  
+  // Get previous and next pages if they exist
   const prevPage = currentIndex > 0 ? docsStructure[currentIndex - 1] : null;
   const nextPage = currentIndex < docsStructure.length - 1 ? docsStructure[currentIndex + 1] : null;
   
-  // If neither prev nor next is available, don't render pagination
-  if (!prevPage && !nextPage) return null;
-  
   return (
-    <nav aria-label="Pagination Navigation" className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-4 mt-12 pt-8 border-t">
+    <nav aria-label="Documentation Navigation" className="flex flex-col sm:flex-row justify-between gap-4 w-full max-w-full">
       {prevPage ? (
-        <NavCard title={prevPage.title} slug={prevPage.slug} direction="prev" />
+        <NavCard
+          title={prevPage.title}
+          slug={prevPage.slug}
+          direction="prev"
+        />
       ) : (
-        <div className="flex-1 sm:flex-initial" /> // Empty div to maintain spacing
+        <div className="flex-1 sm:flex-initial" /> // Spacer
       )}
       
       {nextPage ? (
-        <NavCard title={nextPage.title} slug={nextPage.slug} direction="next" />
+        <NavCard
+          title={nextPage.title}
+          slug={nextPage.slug}
+          direction="next"
+        />
       ) : (
-        <div className="flex-1 sm:flex-initial" /> // Empty div to maintain spacing
+        <div className="flex-1 sm:flex-initial" /> // Spacer
       )}
     </nav>
   );
