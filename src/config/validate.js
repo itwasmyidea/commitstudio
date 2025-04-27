@@ -173,14 +173,54 @@ export async function validateCredentials(config) {
     }
   }
 
-  // Check if OpenAI key is missing
-  if (!updatedConfig.openai?.apiKey) {
-    console.log(chalk.yellow("OpenAI API key is missing"));
-    updatedConfig = await promptForOpenAIKey(updatedConfig);
-  } else {
-    // Set key in global scope for other modules to use
-    global.openaiApiKey = updatedConfig.openai.apiKey;
-    console.log(chalk.green("✓ OpenAI API key is present"));
+  // Ask for AI provider first if not already set
+  if (!updatedConfig.aiProvider) {
+    try {
+      console.log(chalk.blue("\nChoose your AI provider:"));
+      const { provider } = await prompt({
+        type: "select",
+        name: "provider",
+        message: "Select your AI provider:",
+        choices: [
+          { name: "openai", message: "OpenAI (Premium Models)" },
+          { name: "openrouter", message: "OpenRouter (Free Tier Available)" },
+        ],
+        initial: 0,
+      });
+
+      // Save the provider choice
+      updatedConfig.aiProvider = provider;
+      saveConfig({ aiProvider: provider });
+      console.log(chalk.green(`✓ Selected ${provider} as AI provider`));
+    } catch (error) {
+      console.log(
+        chalk.red(
+          `Error selecting AI provider: ${error?.message || "Unknown error"}`,
+        ),
+      );
+      console.log(chalk.yellow("Defaulting to OpenAI."));
+      updatedConfig.aiProvider = "openai";
+    }
+  }
+
+  // Check for API keys based on provider
+  if (updatedConfig.aiProvider === "openai") {
+    if (!updatedConfig.openai?.apiKey) {
+      console.log(chalk.yellow("OpenAI API key is missing"));
+      updatedConfig = await promptForOpenAIKey(updatedConfig);
+    } else {
+      // Set key in global scope for other modules to use
+      global.openaiApiKey = updatedConfig.openai.apiKey;
+      console.log(chalk.green("✓ OpenAI API key is present"));
+    }
+  } else if (updatedConfig.aiProvider === "openrouter") {
+    if (!updatedConfig.openrouter?.apiKey) {
+      console.log(chalk.yellow("OpenRouter API key is missing"));
+      updatedConfig = await promptForOpenRouterKey(updatedConfig);
+    } else {
+      global.openrouterApiKey = updatedConfig.openrouter.apiKey;
+      console.log(chalk.green("✓ OpenRouter API key is present"));
+    }
   }
 
   return updatedConfig;
@@ -326,6 +366,60 @@ async function promptForOpenAIKey(config) {
     console.log(
       chalk.red(
         `Error during OpenAI key prompt: ${error?.message || "Unknown error"}`,
+      ),
+    );
+    // Return the config without changes if there was an error
+    return config;
+  }
+}
+
+/**
+ * Prompt for OpenRouter API key
+ * @param {Object} config - Config object to update
+ */
+async function promptForOpenRouterKey(config) {
+  console.log(chalk.blue("\nPlease enter your OpenRouter API Key"));
+  console.log(chalk.dim("Find it at: https://openrouter.ai/settings/keys"));
+  console.log(
+    chalk.dim(
+      "Note: You can use the free tier models without an API key. Just leave it blank if you want to use the free tier only.\n",
+    ),
+  );
+
+  try {
+    const { openrouterApiKey } = await prompt({
+      type: "password",
+      name: "openrouterApiKey",
+      message: "OpenRouter API key (optional):",
+      validate: (value) => true, // Allow empty value
+    });
+
+    // Store the key without validation
+    if (!config.openrouter) config.openrouter = {};
+    config.openrouter.apiKey = openrouterApiKey;
+    // Set key in global scope for other modules to use
+    if (openrouterApiKey && openrouterApiKey.trim() !== "") {
+      global.openrouterApiKey = openrouterApiKey;
+      console.log(
+        chalk.yellow("Accepting OpenRouter API key without validation."),
+      );
+
+      // Save key automatically
+      saveConfig({ openrouter: { apiKey: openrouterApiKey } });
+      console.log(chalk.green("OpenRouter API key saved for future use."));
+    } else {
+      console.log(
+        chalk.yellow(
+          "No OpenRouter API key provided. Using free tier models only.",
+        ),
+      );
+    }
+
+    return config;
+  } catch (error) {
+    console.log(
+      chalk.red(
+        `Error during OpenRouter key prompt: ${error?.message || "Unknown error"}`,
       ),
     );
     // Return the config without changes if there was an error

@@ -1,13 +1,7 @@
 #!/usr/bin/env node
 
-// Note: This CLI might show DEP0040 punycode deprecation warnings with Node.js >=18.16.0
-// We've fixed the primary source by overriding the ajv dependency, but some warnings may
-// still appear from the whatwg-url/tr46 dependency used by node-fetch.
-//
-// These warnings are harmless and don't affect functionality.
-// To suppress them when running:
-//    NODE_NO_WARNINGS=1 commitstudio
-// or  node --no-deprecation $(which commitstudio)
+// Suppress punycode deprecation warnings automatically
+process.env.NODE_NO_WARNINGS = 1;
 
 import { Command } from "commander";
 import chalk from "chalk";
@@ -27,6 +21,8 @@ import {
 import { fileURLToPath } from "url";
 import path from "path";
 import fs from "fs";
+import ora from "ora";
+import boxen from "boxen";
 
 // Get current package version
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -216,6 +212,87 @@ program
     }
   });
 
+// Add 'test' command to verify API connection and model
+program
+  .command("test")
+  .description("Test your AI configuration with a simple prompt")
+  .option("--verbose", "Show detailed response information")
+  .action(async (options) => {
+    try {
+      console.log(chalk.blue("\nTesting AI configuration..."));
+
+      // Load configuration
+      const config = await loadConfig();
+
+      const spinner = ora("Sending test prompt to AI model...").start();
+
+      try {
+        // Import the test function
+        const { testAIConnection } = await import("../src/ai/test.js");
+
+        // Run the test
+        const result = await testAIConnection(config);
+
+        spinner.succeed("AI model responded successfully");
+
+        // Display formatted result
+        console.log(
+          boxen(
+            `${chalk.green("Model:")} ${result.model}\n` +
+              `${chalk.green("Provider:")} ${result.provider}\n` +
+              `${chalk.green("Response Time:")} ${result.responseTime}ms\n\n` +
+              `${chalk.cyan("Test Prompt:")}\n"${result.prompt}"\n\n` +
+              `${chalk.yellow("AI Response:")}\n"${result.response}"`,
+            {
+              padding: 1,
+              margin: 1,
+              borderStyle: "round",
+              borderColor: "green",
+              title: "AI Test Result",
+              titleAlignment: "center",
+            },
+          ),
+        );
+
+        if (options.verbose) {
+          console.log(chalk.dim("\nDetailed Information:"));
+          console.log(chalk.dim(JSON.stringify(result.details, null, 2)));
+        }
+
+        console.log(
+          chalk.green("\n✓ Your AI configuration is working correctly!"),
+        );
+      } catch (error) {
+        spinner.fail("AI test failed");
+        console.error(chalk.red(`Error: ${error.message}`));
+
+        // Provide troubleshooting tips
+        console.log(chalk.yellow("\nTroubleshooting Tips:"));
+        console.log("1. Check that your API key is valid");
+        console.log("2. Verify your internet connection");
+        console.log(
+          "3. Ensure the selected model is available for your account",
+        );
+        console.log(
+          `4. Try running: ${chalk.cyan("commitstudio config")} to reconfigure your settings`,
+        );
+
+        if (options.verbose && error.stack) {
+          console.error(chalk.dim("\nStack Trace:"));
+          console.error(chalk.dim(error.stack));
+        }
+
+        process.exit(1);
+      }
+    } catch (error) {
+      console.error(chalk.red("Error:"), error.message);
+      if (options.verbose && error.stack) {
+        console.error(chalk.dim(error.stack));
+      }
+      process.exit(1);
+    }
+  });
+
 /**
  * Display current configuration
  */
@@ -266,7 +343,7 @@ async function configureInteractively() {
   const { provider } = await prompt({
     type: "select",
     name: "provider",
-    message: "Select your AI provider (Requires API key):",
+    message: "Select your AI provider:",
     choices: [
       { name: "openai", message: "OpenAI (Premium Models)" },
       { name: "openrouter", message: "OpenRouter (Free Tier Available)" },
