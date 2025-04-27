@@ -162,7 +162,7 @@ async function modifyCommitMessages({
     repo,
     branch,
     path: repoPath,
-    maxCount: options.commits || 5, // Default to last 5 commits
+    maxCount: options.commits || 15, // Default to last 15 commits
     since: options.since,
     author: options.author,
   };
