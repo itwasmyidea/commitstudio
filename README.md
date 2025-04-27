@@ -138,7 +138,7 @@ commitstudio yolo [options]
 
 ## Managing Your Configuration
 
-CommitStudio securely saves your GitHub token and OpenAI API key to avoid asking for them each time you run the tool. 
+CommitStudio securely saves your GitHub token and OpenAI API key to avoid asking for them each time you run the tool.
 
 ### Saved Credentials Location
 
@@ -187,7 +187,7 @@ This will clear all stored tokens and credentials, allowing you to start fresh n
 
 ### Node.js Deprecation Warnings
 
-If you see DEP0040 punycode deprecation warnings when running CommitStudio, these are from dependencies and don't affect functionality. To suppress these warnings, you can:
+The punycode deprecation warning (`DEP0040`) that might appear in Node.js >=18.16.0 has been fixed in the package. If you still encounter any deprecation warnings, you can suppress them using one of these methods:
 
 ```bash
 # Use the npm start script (includes the --no-deprecation flag)
@@ -196,7 +196,7 @@ npm start
 # Or run with the flag directly
 node --no-deprecation ./bin/cli.js
 
-# For detailed diagnostics 
+# For detailed diagnostics
 npm run start:debug
 ```
 

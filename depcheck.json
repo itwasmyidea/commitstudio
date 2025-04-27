@@ -1,0 +1,96 @@
+{
+  "dependencies": ["chalk-animation", "execa", "listr2"],
+  "devDependencies": [
+    "eslint-config-prettier",
+    "eslint-plugin-import",
+    "eslint-plugin-node",
+    "vitest-mock-extended"
+  ],
+  "missing": {},
+  "using": {
+    "eslint": ["/Users/realeyes/Desktop/e/commitstudio/package.json"],
+    "husky": ["/Users/realeyes/Desktop/e/commitstudio/package.json"],
+    "prettier": ["/Users/realeyes/Desktop/e/commitstudio/package.json"],
+    "vitest": [
+      "/Users/realeyes/Desktop/e/commitstudio/package.json",
+      "/Users/realeyes/Desktop/e/commitstudio/test/analyzer.test.js"
+    ],
+    "lint-staged": ["/Users/realeyes/Desktop/e/commitstudio/package.json"],
+    "chalk": [
+      "/Users/realeyes/Desktop/e/commitstudio/src/index.js",
+      "/Users/realeyes/Desktop/e/commitstudio/src/yolo/index.js",
+      "/Users/realeyes/Desktop/e/commitstudio/src/github/auth.js",
+      "/Users/realeyes/Desktop/e/commitstudio/src/github/comments.js",
+      "/Users/realeyes/Desktop/e/commitstudio/src/github/repository.js",
+      "/Users/realeyes/Desktop/e/commitstudio/src/config/validate.js",
+      "/Users/realeyes/Desktop/e/commitstudio/src/ai/analyzer.js",
+      "/Users/realeyes/Desktop/e/commitstudio/scripts/docs-map.js",
+      "/Users/realeyes/Desktop/e/commitstudio/scripts/generate-doc.js",
+      "/Users/realeyes/Desktop/e/commitstudio/scripts/pre-publish-check.js",
+      "/Users/realeyes/Desktop/e/commitstudio/scripts/validate-docs.js",
+      "/Users/realeyes/Desktop/e/commitstudio/bin/cli.js"
+    ],
+    "ora": [
+      "/Users/realeyes/Desktop/e/commitstudio/src/index.js",
+      "/Users/realeyes/Desktop/e/commitstudio/src/yolo/index.js",
+      "/Users/realeyes/Desktop/e/commitstudio/src/github/auth.js"
+    ],
+    "boxen": [
+      "/Users/realeyes/Desktop/e/commitstudio/src/index.js",
+      "/Users/realeyes/Desktop/e/commitstudio/src/yolo/index.js"
+    ],
+    "gradient-string": ["/Users/realeyes/Desktop/e/commitstudio/src/index.js"],
+    "cli-table3": ["/Users/realeyes/Desktop/e/commitstudio/src/index.js"],
+    "simple-git": [
+      "/Users/realeyes/Desktop/e/commitstudio/src/yolo/index.js",
+      "/Users/realeyes/Desktop/e/commitstudio/src/github/commits.js",
+      "/Users/realeyes/Desktop/e/commitstudio/src/github/repository.js"
+    ],
+    "openai": [
+      "/Users/realeyes/Desktop/e/commitstudio/src/yolo/index.js",
+      "/Users/realeyes/Desktop/e/commitstudio/src/config/validate.js",
+      "/Users/realeyes/Desktop/e/commitstudio/src/ai/analyzer.js"
+    ],
+    "zod": [
+      "/Users/realeyes/Desktop/e/commitstudio/src/yolo/index.js",
+      "/Users/realeyes/Desktop/e/commitstudio/src/config/config.js",
+      "/Users/realeyes/Desktop/e/commitstudio/src/config/validate.js",
+      "/Users/realeyes/Desktop/e/commitstudio/src/ai/analyzer.js",
+      "/Users/realeyes/Desktop/e/commitstudio/src/ai/providers/index.js"
+    ],
+    "@octokit/auth-oauth-device": [
+      "/Users/realeyes/Desktop/e/commitstudio/src/github/auth.js"
+    ],
+    "open": ["/Users/realeyes/Desktop/e/commitstudio/src/github/auth.js"],
+    "@octokit/rest": [
+      "/Users/realeyes/Desktop/e/commitstudio/src/github/comments.js",
+      "/Users/realeyes/Desktop/e/commitstudio/src/github/commits.js",
+      "/Users/realeyes/Desktop/e/commitstudio/src/github/repository.js",
+      "/Users/realeyes/Desktop/e/commitstudio/src/config/validate.js"
+    ],
+    "enquirer": [
+      "/Users/realeyes/Desktop/e/commitstudio/src/github/repository.js",
+      "/Users/realeyes/Desktop/e/commitstudio/src/config/validate.js",
+      "/Users/realeyes/Desktop/e/commitstudio/scripts/generate-doc.js",
+      "/Users/realeyes/Desktop/e/commitstudio/bin/cli.js"
+    ],
+    "conf": ["/Users/realeyes/Desktop/e/commitstudio/src/config/config.js"],
+    "dotenv": ["/Users/realeyes/Desktop/e/commitstudio/src/config/config.js"],
+    "ai": ["/Users/realeyes/Desktop/e/commitstudio/src/ai/analyzer.js"],
+    "p-limit": ["/Users/realeyes/Desktop/e/commitstudio/src/ai/analyzer.js"],
+    "@ai-sdk/openai": [
+      "/Users/realeyes/Desktop/e/commitstudio/src/ai/providers/index.js"
+    ],
+    "glob": [
+      "/Users/realeyes/Desktop/e/commitstudio/scripts/docs-map.js",
+      "/Users/realeyes/Desktop/e/commitstudio/scripts/validate-docs.js"
+    ],
+    "gray-matter": [
+      "/Users/realeyes/Desktop/e/commitstudio/scripts/docs-map.js",
+      "/Users/realeyes/Desktop/e/commitstudio/scripts/validate-docs.js"
+    ],
+    "commander": ["/Users/realeyes/Desktop/e/commitstudio/bin/cli.js"]
+  },
+  "invalidFiles": {},
+  "invalidDirs": {}
+}

@@ -2,6 +2,30 @@
 
 All notable changes to CommitStudio will be documented in this file.
 
+## [0.3.6] - 2025-04-27
+
+### Added
+
+- Multiple AI provider support:
+  - Added OpenRouter as an alternative AI provider
+  - Free tier support with Llama 4 Maverick model (no API key required)
+  - Extended configuration UI to select providers
+  - Provider-specific model selection
+
+### Changed
+
+- Migrated to Vercel AI SDK for unified provider handling
+- Updated configuration to store provider preferences
+- Enhanced documentation with provider setup guides
+
+### Improved
+
+- Comprehensive documentation update with detailed AI model configuration options
+- Enhanced documentation for all commands and settings
+- Added detailed troubleshooting guidance for AI model-related issues
+- Fixed punycode deprecation warnings using a maintained replacement module
+- Improved API key saving for both OpenAI and OpenRouter
+
 ## [0.3.5] - 2025-04-23
 
 ### Fixed
@@ -10,10 +34,6 @@ All notable changes to CommitStudio will be documented in this file.
 - Resolved module import errors when running in Node.js v22+ environments
 
 ### Improved
-
-- Comprehensive documentation update with detailed AI model configuration options
-- Enhanced documentation for all commands and settings
-- Added detailed troubleshooting guidance for AI model-related issues
 
 ## [0.3.4] - 2025-04-23
 

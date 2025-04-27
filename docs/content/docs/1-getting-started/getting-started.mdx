@@ -10,7 +10,7 @@ Before using CommitStudio, you need to have:
 - **Node.js** v18 or higher
 - **Git** installed and configured
 - A **GitHub account** with access to your repositories
-- An **OpenAI API key** for AI-powered analysis
+- An **OpenAI API key** or **OpenRouter account** for AI-powered analysis
 
 ## Installation
 
@@ -32,10 +32,17 @@ commitstudio --help
 
 This will display the available commands and options.
 
+> **TIP:** If you see punycode deprecation warnings, you can suppress them by running:
+> ```bash
+> NODE_NO_WARNINGS=1 commitstudio
+> ```
+> This warning is harmless and doesn't affect functionality. See [Known Issues](/docs/6-troubleshooting/known-issues) for details.
+
 ## Next Steps
 
 Continue your journey with CommitStudio by exploring:
 
 - [Configuration Options](/docs/3-configuration/options)
 - [Standard Mode](/docs/2-usage/standard-mode)
+- [YOLO Mode](/docs/2-usage/yolo-mode)
 - [Examples](/docs/2-usage/examples)

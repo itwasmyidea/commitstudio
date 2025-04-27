@@ -8,6 +8,9 @@
 export const GITHUB_CLIENT_ID =
   process.env.GITHUB_CLIENT_ID || "Ov23liIA45phTP52foql";
 
+// Available AI providers
+export const AVAILABLE_AI_PROVIDERS = ["openai", "openrouter"];
+
 // Available AI models
 export const AVAILABLE_AI_MODELS = [
   "gpt-4o",
@@ -16,6 +19,14 @@ export const AVAILABLE_AI_MODELS = [
   "gpt-4.1-nano",
   "o4-mini",
   "o3-mini",
+];
+
+// Available OpenRouter models
+export const OPENROUTER_MODELS = [
+  "meta-llama/llama-4-maverick:free",
+  "meta-llama/llama-4-pro:free",
+  "anthropic/claude-3-opus",
+  "anthropic/claude-3-sonnet",
 ];
 
 // Default settings
@@ -39,9 +50,15 @@ export const DEFAULT_SETTINGS = {
   // Maximum file size to analyze in bytes (default: 1MB)
   maxFileSize: 1024 * 1024,
 
+  // Default AI provider
+  aiProvider: "openai",
+
   // OpenAI model to use for analysis
   openaiModel: "gpt-4.1-mini",
-  
+
+  // OpenRouter model to use for analysis
+  openrouterModel: "meta-llama/llama-4-maverick:free",
+
   // Default max tokens for API requests
   maxTokens: 2000,
 

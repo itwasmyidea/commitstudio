@@ -1,18 +1,19 @@
 {
   "name": "commitstudio",
-  "version": "0.3.5",
+  "version": "0.3.6",
   "description": "An AI-powered tool that analyzes git diffs and posts insightful comments to GitHub",
   "type": "module",
   "bin": {
-    "commitstudio": "bin/cli.js"
+    "commitstudio": "node --no-warnings ./bin/cli.js"
   },
   "main": "./src/index.js",
   "engines": {
     "node": ">=18.0.0"
   },
   "scripts": {
-    "start": "node --no-deprecation ./bin/cli.js",
-    "start:debug": "node --trace-deprecation ./bin/cli.js",
+    "start": "node --no-warnings ./bin/cli.js",
+    "start:debug": "node --no-warnings ./bin/cli.js",
+    "config": "node --no-warnings ./bin/cli.js config",
     "test": "vitest run",
     "test:watch": "vitest",
     "lint": "eslint .",
@@ -31,6 +32,11 @@
     "docs:build": "cd docs && npm run build",
     "docs:start": "cd docs && npm run start"
   },
+  "overrides": {
+    "@eslint/eslintrc": {
+      "ajv": "6.12.6"
+    }
+  },
   "keywords": [
     "git",
     "github",
@@ -45,8 +51,10 @@
   "author": "Ali Geramy",
   "license": "MIT",
   "dependencies": {
+    "@ai-sdk/openai": "^1.3.20",
     "@octokit/auth-oauth-device": "^7.1.5",
     "@octokit/rest": "^20.0.2",
+    "ai": "^4.3.10",
     "boxen": "^7.1.1",
     "chalk": "^5.3.0",
     "chalk-animation": "^2.0.3",

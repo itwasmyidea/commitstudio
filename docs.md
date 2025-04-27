@@ -57,6 +57,97 @@
 - [Configuration Options](#configuration-options)
 - [Supported AI Models](#supported-ai-models)
 
+## AI Provider Integration
+
+CommitStudio now supports multiple AI providers, giving you flexibility in choosing how you want to power your code analysis:
+
+## Supported Providers
+
+1. **OpenAI** - Premium models with state-of-the-art analysis capabilities
+
+   - Requires an OpenAI API key
+   - Offers various models: gpt-4o, gpt-4.1, gpt-4.1-mini, etc.
+   - Best performance for in-depth code analysis
+
+2. **OpenRouter** - Alternative provider with more affordable options
+   - Requires a free API key from https://openrouter.ai
+   - Offers free access to Llama 4 Maverick model (with free API key)
+   - Also provides access to other models like Claude
+   - Great alternative to OpenAI with potentially lower costs
+
+## Configuring Your AI Provider
+
+You can choose and configure your AI provider using:
+
+```bash
+commitstudio config
+```
+
+This will launch an interactive configuration wizard where you can:
+
+1. Select your preferred provider (OpenAI or OpenRouter)
+2. Provide API keys (required for both providers)
+3. Choose specific models
+4. Set token limits
+
+### Getting an OpenRouter API Key
+
+To use OpenRouter (even for the free models):
+
+1. Sign up at https://openrouter.ai
+2. Create an API key at https://openrouter.ai/settings/keys
+3. Run `commitstudio config`
+4. Select "OpenRouter" as your provider
+5. Enter your API key when prompted
+6. Choose "meta-llama/llama-4-maverick:free" for the free model
+
+## Environment Variables
+
+You can also configure providers using environment variables:
+
+```bash
+# OpenAI configuration
+export OPENAI_API_KEY=your_openai_key
+export OPENAI_MODEL=gpt-4.1-mini
+
+# OR OpenRouter configuration
+export AI_PROVIDER=openrouter
+export OPENROUTER_API_KEY=your_openrouter_key  # Optional
+export OPENROUTER_MODEL=meta-llama/llama-4-maverick:free
+```
+
+## Provider-Specific Settings
+
+Each provider has its own set of available models:
+
+### OpenAI Models
+
+- gpt-4o
+- gpt-4.1
+- gpt-4.1-mini
+- gpt-4.1-nano
+- o4-mini
+- o3-mini
+
+### OpenRouter Models
+
+- meta-llama/llama-4-maverick:free (Free tier)
+- meta-llama/llama-4-pro:free
+- anthropic/claude-3-opus
+- anthropic/claude-3-sonnet
+
+## Switching Between Providers
+
+You can easily switch between providers at any time:
+
+```bash
+# Switch to OpenRouter with free tier
+commitstudio config --provider openrouter --model meta-llama/llama-4-maverick:free
+
+# Switch to OpenAI
+commitstudio config --provider openai --model gpt-4o
+```
+
 ---
 
 # Introduction
@@ -575,8 +666,8 @@ await run({
   dryRun: true,
   openai: {
     model: "gpt-4.1-mini",
-    maxTokens: 2000
-  }
+    maxTokens: 2000,
+  },
 });
 
 // YOLO mode
@@ -586,8 +677,8 @@ await runYolo({
   emoji: true,
   openai: {
     model: "gpt-4.1-mini",
-    maxTokens: 2000
-  }
+    maxTokens: 2000,
+  },
 });
 ```
 
@@ -609,13 +700,13 @@ await runYolo({
 
 CommitStudio supports the following OpenAI models:
 
-| Model | Capabilities | Best For | Token Limit |
-|-------|--------------|----------|-------------|
-| gpt-4o | Most advanced general AI model | Complex, nuanced analysis | Highest |
-| gpt-4.1 | High performance, latest features | Deep technical analysis | High |
-| gpt-4.1-mini | Balance of performance and cost | Most analysis tasks | Medium |
-| gpt-4.1-nano | Efficient, faster processing | Simpler code reviews | Lower |
-| o4-mini | Alternative name for mini variant | Standard code review | Medium |
-| o3-mini | Older model | Legacy compatibility | Lower |
+| Model        | Capabilities                      | Best For                  | Token Limit |
+| ------------ | --------------------------------- | ------------------------- | ----------- |
+| gpt-4o       | Most advanced general AI model    | Complex, nuanced analysis | Highest     |
+| gpt-4.1      | High performance, latest features | Deep technical analysis   | High        |
+| gpt-4.1-mini | Balance of performance and cost   | Most analysis tasks       | Medium      |
+| gpt-4.1-nano | Efficient, faster processing      | Simpler code reviews      | Lower       |
+| o4-mini      | Alternative name for mini variant | Standard code review      | Medium      |
+| o3-mini      | Older model                       | Legacy compatibility      | Lower       |
 
 The default model is gpt-4.1-mini, which offers a good balance of performance and cost.

@@ -1,0 +1,36 @@
+---
+title: Known Issues
+description: Common issues and their solutions when using CommitStudio
+---
+
+## Previous Issues (Now Fixed)
+
+### ✅ Punycode Deprecation Warning (DEP0040) - Partially Fixed in v0.3.6
+
+**Issue:** Node.js ≥18.16.0 shows DEP0040 punycode deprecation warnings due to dependencies that use the deprecated punycode module.
+
+**Fix Status:** 
+
+We've partially fixed this by ensuring proper compatibility with ESLint:
+
+```json
+"overrides": {
+  "@eslint/eslintrc": {
+    "ajv": "6.12.6"
+  }
+}
+```
+
+Additionally, we've added the `--no-warnings` flag to the CLI commands to suppress warnings.
+
+**If you're still seeing this warning:** You can run CommitStudio with:
+
+```bash
+NODE_NO_WARNINGS=1 commitstudio
+```
+
+The warnings are harmless and don't affect functionality.
+
+## Current Known Issues
+
+No other known issues at this time! If you encounter any problems, please [file an issue](https://github.com/itwasmyidea/commitstudio/issues) on our GitHub repository. 

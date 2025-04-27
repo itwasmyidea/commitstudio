@@ -1,11 +1,13 @@
 import OpenAI from "openai";
+import { generateText } from "ai";
 import pLimit from "p-limit";
 import chalk from "chalk";
 import { getCommitDiff } from "../github/commits.js";
 import { checkCommentExists } from "../github/comments.js";
+import { AIProviderManager } from "../ai/providers/index.js";
 
 /**
- * Analyze git diffs with OpenAI
+ * Analyze git diffs with AI
  * @param {Object} options - Options for analysis
  * @param {Array} options.commits - List of commits to analyze
  * @param {string} options.repoPath - Path to local repository
@@ -23,10 +25,26 @@ export async function analyzeDiffs({
   onProgress,
   config = {},
 }) {
-  // Use global openaiApiKey if it exists, or check environment variable
-  const apiKey = global.openaiApiKey || process.env.OPENAI_API_KEY;
+  // Determine provider and API keys
+  const provider = config.aiProvider || "openai";
 
-  if (!apiKey) {
+  // Get appropriate API key based on provider
+  let apiKey = null;
+  if (provider === "openai") {
+    apiKey =
+      global.openaiApiKey ||
+      config.openai?.apiKey ||
+      process.env.OPENAI_API_KEY;
+  } else if (provider === "openrouter") {
+    apiKey =
+      global.openrouterApiKey ||
+      config.openrouter?.apiKey ||
+      process.env.OPENROUTER_API_KEY;
+    // Note: OpenRouter can work without an API key for free tier
+  }
+
+  // If OpenAI is selected but no API key, warn and use mock mode
+  if (provider === "openai" && !apiKey) {
     console.log(
       chalk.yellow(
         "Warning: OpenAI API key is not available. Using mock analysis mode.",
@@ -42,11 +60,6 @@ export async function analyzeDiffs({
   }
 
   try {
-    const openai = new OpenAI({
-      apiKey: apiKey,
-      dangerouslyAllowBrowser: true, // For browser support
-    });
-
     const results = [];
 
     // Set up concurrency limit
@@ -79,11 +92,13 @@ export async function analyzeDiffs({
           return null;
         }
 
-        // Analyze diff with OpenAI
-        const analysis = await analyzeWithOpenAI(openai, {
+        // Analyze diff with AI
+        const analysis = await analyzeWithAI({
           diff,
           commit,
           config,
+          provider,
+          apiKey,
         });
 
         // Add commit info to result
@@ -103,7 +118,7 @@ export async function analyzeDiffs({
     // Filter out null results (skipped commits)
     return results.filter(Boolean);
   } catch (error) {
-    console.log(chalk.red(`Error using OpenAI analysis: ${error.message}`));
+    console.log(chalk.red(`Error using AI analysis: ${error.message}`));
     console.log(chalk.yellow("Falling back to mock analysis mode..."));
     return await analyzeDiffsWithMock({
       commits,
@@ -112,6 +127,100 @@ export async function analyzeDiffs({
       repo,
       onProgress,
     });
+  }
+}
+
+/**
+ * Analyze a diff using AI
+ * @param {Object} options - Analysis options
+ * @param {string} options.diff - Git diff content
+ * @param {Object} options.commit - Commit metadata
+ * @param {Object} [options.config] - Configuration options
+ * @param {string} [options.provider] - AI provider
+ * @param {string} [options.apiKey] - API key
+ * @returns {Promise<Object>} Analysis result
+ */
+async function analyzeWithAI({
+  diff,
+  commit,
+  config = {},
+  provider = "openai",
+  apiKey,
+}) {
+  // Create a system prompt that instructs the model on how to analyze code
+  const systemPrompt = `You are a helpful programming assistant specializing in code review.
+You will be given a git diff from a commit along with the commit message.
+Your task is to analyze the code changes and provide thoughtful, constructive feedback.
+
+Please respond with:
+1. A brief summary of the changes
+2. Specific comments on the code changes, including potential issues, bugs, or improvements
+3. Suggestions for future improvements if applicable
+
+Format your comments to be helpful and constructive. Focus on meaningful insights rather than trivial issues.
+If relevant, mention best practices and why they matter.`;
+
+  try {
+    // Truncate very large diffs to prevent rate limit errors
+    // AI models have token limits, so we'll limit large diffs
+    const MAX_DIFF_LENGTH = 20000;
+    let truncatedDiff = diff;
+    let diffTruncated = false;
+
+    if (diff.length > MAX_DIFF_LENGTH) {
+      truncatedDiff = diff.substring(0, MAX_DIFF_LENGTH);
+      diffTruncated = true;
+    }
+
+    // Configure the model based on provider
+    let model;
+
+    if (provider === "openai") {
+      // Use Vercel AI SDK with OpenAI
+      model = AIProviderManager.getProvider({
+        provider: "openai",
+        model: config?.openai?.model,
+        apiKey: apiKey,
+      });
+    } else if (provider === "openrouter") {
+      // Use Vercel AI SDK with OpenRouter
+      model = AIProviderManager.getProvider({
+        provider: "openrouter",
+        model: config?.openrouter?.model,
+        apiKey: apiKey,
+      });
+    } else {
+      throw new Error(`Unsupported provider: ${provider}`);
+    }
+
+    // User prompt with commit and diff
+    const userPrompt = `Commit: ${commit.message}\n\nDiff:${diffTruncated ? " (truncated due to large size)\n" : "\n"}\`\`\`diff\n${truncatedDiff}\n\`\`\``;
+
+    // Generate text with Vercel AI SDK
+    const { text } = await generateText({
+      model: model,
+      system: systemPrompt,
+      prompt: userPrompt,
+      temperature: 0.3, // Lower temperature for more focused analysis
+      maxTokens: config?.maxTokens || 2000, // Use configured max tokens or default
+    });
+
+    // Add note about truncation if diff was truncated
+    let result = parseAnalysisResponse(text);
+    if (diffTruncated) {
+      result.summary = `[Note: This analysis is based on a truncated diff due to size limits] ${result.summary}`;
+    }
+
+    return result;
+  } catch (error) {
+    console.error(`Error analyzing commit ${commit.sha}: ${error.message}`);
+
+    // Return a basic analysis with the error
+    return {
+      summary: `Error during analysis: ${error.message}`,
+      comments: [],
+      suggestions: [],
+    };
   }
 }
 
@@ -190,8 +299,8 @@ async function analyzeDiffsWithMock({
  */
 function generateMockAnalysis(diff, commit) {
   // Count added and removed lines
-  const addedLines = (diff.match(/^\+(?![\+\-])/gm) || []).length;
-  const removedLines = (diff.match(/^\-(?![\+\-])/gm) || []).length;
+  const addedLines = (diff.match(/^\+(?![+-])/gm) || []).length;
+  const removedLines = (diff.match(/^-(?![+-])/gm) || []).length;
 
   // Extract file names from the diff
   const filePattern = /^diff --git a\/(.+?) b\/(.+?)$/gm;
@@ -223,76 +332,6 @@ function generateMockAnalysis(diff, commit) {
     comments,
     suggestions,
   };
-}
-
-/**
- * Analyze a diff using OpenAI API
- * @param {Object} openai - OpenAI client instance
- * @param {Object} options - Analysis options
- * @param {string} options.diff - Git diff content
- * @param {Object} options.commit - Commit metadata
- * @param {Object} [options.config] - Configuration options
- * @returns {Promise<Object>} Analysis result
- */
-async function analyzeWithOpenAI(openai, { diff, commit, config = {} }) {
-  // Create a system prompt that instructs the model on how to analyze code
-  const systemPrompt = `You are a helpful programming assistant specializing in code review.
-You will be given a git diff from a commit along with the commit message.
-Your task is to analyze the code changes and provide thoughtful, constructive feedback.
-
-Please respond with:
-1. A brief summary of the changes
-2. Specific comments on the code changes, including potential issues, bugs, or improvements
-3. Suggestions for future improvements if applicable
-
-Format your comments to be helpful and constructive. Focus on meaningful insights rather than trivial issues.
-If relevant, mention best practices and why they matter.`;
-
-  try {
-    // Truncate very large diffs to prevent rate limit errors
-    // GPT models have token limits, so we'll limit large diffs
-    const MAX_DIFF_LENGTH = 20000;
-    let truncatedDiff = diff;
-    let diffTruncated = false;
-
-    if (diff.length > MAX_DIFF_LENGTH) {
-      truncatedDiff = diff.substring(0, MAX_DIFF_LENGTH);
-      diffTruncated = true;
-    }
-
-    const response = await openai.chat.completions.create({
-      model: config?.openai?.model || "gpt-4.1-mini", // Use configured model or default
-      messages: [
-        { role: "system", content: systemPrompt },
-        {
-          role: "user",
-          content: `Commit: ${commit.message}\n\nDiff:${diffTruncated ? " (truncated due to large size)\n" : "\n"}\`\`\`diff\n${truncatedDiff}\n\`\`\``,
-        },
-      ],
-      temperature: 0.3, // Lower temperature for more focused analysis
-      max_tokens: config?.openai?.maxTokens || 2000, // Use configured max tokens or default
-    });
-
-    // Extract and parse the assistant's response
-    const analysisText = response.choices[0].message.content;
-
-    // Add note about truncation if diff was truncated
-    let result = parseAnalysisResponse(analysisText);
-    if (diffTruncated) {
-      result.summary = `[Note: This analysis is based on a truncated diff due to size limits] ${result.summary}`;
-    }
-
-    return result;
-  } catch (error) {
-    console.error(`Error analyzing commit ${commit.sha}: ${error.message}`);
-
-    // Return a basic analysis with the error
-    return {
-      summary: `Error during analysis: ${error.message}`,
-      comments: [],
-      suggestions: [],
-    };
-  }
 }
 
 /**
@@ -402,7 +441,7 @@ function parseAnalysisResponse(text) {
       for (const line of suggestionLines) {
         // Extract bullet points or numbered suggestions
         const suggestionMatch =
-          line.match(/^[*-]\s+(.+)/) || line.match(/^\d+\.\s+(.+)/);
+          line.match(/^[*-] (.+)/) || line.match(/^\d+\. (.+)/);
 
         if (suggestionMatch) {
           result.suggestions.push(suggestionMatch[1]);
