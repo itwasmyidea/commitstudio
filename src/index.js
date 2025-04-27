@@ -1,7 +1,6 @@
 import chalk from "chalk";
 import ora from "ora";
 import boxen from "boxen";
-import gradient from "gradient-string";
 import Table from "cli-table3";
 
 import { validateCredentials } from "./config/validate.js";

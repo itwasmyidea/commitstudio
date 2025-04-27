@@ -1,5 +1,3 @@
-import { dirname } from "path";
-import { fileURLToPath } from "url";
 import simpleGit from "simple-git";
 import { Octokit } from "@octokit/rest";
 import Enquirer from "enquirer";

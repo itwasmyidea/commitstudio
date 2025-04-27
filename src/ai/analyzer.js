@@ -1,4 +1,3 @@
-import OpenAI from "openai";
 import { generateText } from "ai";
 import pLimit from "p-limit";
 import chalk from "chalk";

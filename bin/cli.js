@@ -23,7 +23,6 @@ import enquirer from "enquirer";
 import {
   AVAILABLE_AI_MODELS,
   AVAILABLE_AI_PROVIDERS,
-  DEFAULT_SETTINGS,
 } from "../src/config/constants.js";
 import { fileURLToPath } from "url";
 import path from "path";
@@ -274,9 +273,6 @@ async function configureInteractively() {
     ],
     initial: config.aiProvider === "openrouter" ? 1 : 0,
   });
-
-  // Update the config with the selected provider
-  let apiKey = null;
 
   // If provider is OpenAI, we need an API key
   if (provider === "openai") {

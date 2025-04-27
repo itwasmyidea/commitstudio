@@ -7,7 +7,6 @@ import OpenAI from "openai";
 import { validateCredentials } from "../config/validate.js";
 import { detectRepository, getRepositoryInfo } from "../github/repository.js";
 import { getCommits } from "../github/commits.js";
-import { getCacheManager } from "../utils/cache.js";
 
 // Format a message in a styled box
 const boxMessage = (message, title = null, type = "info") => {
@@ -358,7 +357,10 @@ async function modifyCommitMessages({
  * @param {Object} [options.config] - Configuration options
  * @returns {Promise<string>} New commit message
  */
-async function generateCommitMessage(openai, { oldMessage, diff, useEmoji, config = {} }) {
+async function generateCommitMessage(
+  openai,
+  { oldMessage, diff, useEmoji, config = {} },
+) {
   // Truncate very large diffs to prevent rate limit errors
   const MAX_DIFF_LENGTH = 15000;
   let truncatedDiff = diff;

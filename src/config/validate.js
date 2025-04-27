@@ -1,5 +1,4 @@
 import { Octokit } from "@octokit/rest";
-import { OpenAI } from "openai";
 import chalk from "chalk";
 import enquirer from "enquirer";
 const { prompt } = enquirer;

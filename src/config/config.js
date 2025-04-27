@@ -3,13 +3,7 @@ import { dirname, join } from "path";
 import { fileURLToPath } from "url";
 import Conf from "conf";
 import { config as dotenvConfig } from "dotenv";
-import z from "zod";
-import {
-  AVAILABLE_AI_MODELS,
-  AVAILABLE_AI_PROVIDERS,
-  OPENROUTER_MODELS,
-  DEFAULT_SETTINGS,
-} from "./constants.js";
+import { DEFAULT_SETTINGS } from "./constants.js";
 
 // Load .env file if present
 dotenvConfig();
@@ -18,22 +12,6 @@ dotenvConfig();
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const require = createRequire(import.meta.url);
 const pkg = require(join(__dirname, "../../package.json"));
-
-// Configuration schema
-const configSchema = z.object({
-  githubToken: z.string().min(1, "GitHub token is required").optional(),
-  openaiApiKey: z.string().min(1, "OpenAI API key is required").optional(),
-  openrouterApiKey: z.string().optional(),
-  aiProvider: z.string().default(DEFAULT_SETTINGS.aiProvider),
-  cacheEnabled: z.boolean().default(true),
-  cachePath: z.string().optional(),
-  maxConcurrent: z.number().int().positive().default(3),
-  dryRun: z.boolean().default(false),
-  verbose: z.boolean().default(false),
-  openaiModel: z.string().default(DEFAULT_SETTINGS.openaiModel),
-  openrouterModel: z.string().default(DEFAULT_SETTINGS.openrouterModel),
-  maxTokens: z.number().int().positive().default(DEFAULT_SETTINGS.maxTokens),
-});
 
 // Create config store
 const configStore = new Conf({

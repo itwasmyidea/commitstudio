@@ -2,7 +2,6 @@ import { createOAuthDeviceAuth } from "@octokit/auth-oauth-device";
 import open from "open";
 import chalk from "chalk";
 import ora from "ora";
-import { loadConfig, saveConfig } from "../config/config.js";
 
 /**
  * Authenticates with GitHub using the device flow
